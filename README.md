@@ -1,8 +1,6 @@
-[//]: # (download_link=https://google.com)
-
 # <img src="public/icons/icon_48.png" width="45" align="left"> Anime Art Forwarder
 
-[Download build](download_link)
+[Download build](https://github.com/Octoober/anime-art-forwarder/releases)
 
 This Chrome browser extension streamlines the process of sending anime art to your Telegram channel through a Telegram bot. With just one click, you can quickly forward anime art from various sources directly to your Telegram channel using the Telegram bot. This extension provides a simple and efficient way to collect and share your favorite anime art with the community.
 
@@ -19,7 +17,7 @@ Currently, the extension does NOT support adding multiple Telegram channels, but
 - Compatibility with popular anime art websites
 
 ## Browser Extension Installation
-1. [Download the zip archive](download_link) of the extension to your computer.
+1. [Download the zip archive](https://github.com/Octoober/anime-art-forwarder/releases) of the extension to your computer.
 2. Extract the zip archive to any folder.
 3. Open Google Chrome browser.
 4. Type "chrome://extensions" in the address bar and press Enter.
@@ -38,7 +36,7 @@ Steps to configure the extension in your browser:
    - If your channel is private, instead of the public name, you need to provide the unique identifier of your channel.
      To obtain the unique identifier, follow these steps:
      - Temporarily make your channel public.
-     - Go to the following link: "https://api.telegram.org/bot<YOUR_TOKEN_KEY>/getChat?chat_id=@channelName"
+     - Go to the following link: `https://api.telegram.org/bot<YOUR_TOKEN_KEY>/getChat?chat_id=@channelName`
        Replace <YOUR_TOKEN_KEY> with your API key, and replace @channelName with the name of your channel.
      - Copy the negative number from the "id" field in the API response and paste it into the "Chat ID" field in the extension settings.
      - After configuring the extension, you can revert your channel back to private mode.
