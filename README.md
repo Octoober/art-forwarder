@@ -3,11 +3,12 @@
 <a target="_blank" href="https://github.com/Octoober/anime-art-forwarder/releases">Download build</a>
 
 This Chrome browser extension streamlines the process of sending anime art to your Telegram channel through a Telegram bot. With just one click, you can quickly forward anime art from various sources directly to your Telegram channel using the Telegram bot. This extension provides a simple and efficient way to collect and share your favorite anime art with the community.
-<br><br>
+<br>
 <div align="center">
     <img width="500" align="center" src="./assets/example.gif">
 </div>
 <br><br>
+
 Current version of the extension supports the following websites:
 - donmai.us
 - rule34.xxx
