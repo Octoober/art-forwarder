@@ -25,7 +25,7 @@ Currently, the extension does NOT support adding multiple Telegram channels, but
 1. <a target="_blank" href="https://github.com/Octoober/anime-art-forwarder/releases">Download the zip archive</a> of the extension to your computer.
 2. Extract the zip archive to any folder.
 3. Open Google Chrome browser.
-4. Type [chrome://extensions](chrome://extensions) in the address bar and press Enter.
+4. Type `chrome://extensions` in the address bar and press Enter.
 5. Enable the Developer Mode located in the top right corner of the page.
 6. Find the option "Load unpacked" and click on it.
 7. Choose the folder where you extracted the archive.
