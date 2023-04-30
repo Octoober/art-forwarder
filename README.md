@@ -2,7 +2,7 @@
 
 <a target="_blank" href="https://github.com/Octoober/anime-art-forwarder/releases">Download build</a>
 
-"Anime Art Forwarder" is a Chrome browser extension designed to simplify the process of sharing anime art to a Telegram channel. With just one click, channel administrators can quickly send anime art directly from their browser to their designated Telegram channel.
+This Chrome browser extension simplifies the process of sharing anime art to a Telegram channel with just one click. It serves as a helpful tool for channel administrators who want to quickly send anime art from their browser to a designated Telegram channel.
 <br>
 <div align="center">
     <img width="500" align="center" src="./assets/example.gif">
