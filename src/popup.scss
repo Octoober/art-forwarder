@@ -1,0 +1,82 @@
+@font-face {
+    font-family: 'Roboto';
+    src: url('./fonts/roboto/regular/Roboto.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('./fonts/roboto/bold/Robotobold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('./fonts/roboto/black/Robotoblack.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+}
+
+html {
+    width: 300px;
+    height: 400px;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+    font-weight: normal;
+    font-style: normal;
+}
+
+.notification {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    padding: 5px 0 5px 0;
+    &.error {
+        background-color: red;
+        color: #fff;
+    }
+    &.success {
+        background-color: green;
+        color: #fff;
+    }
+}
+
+.app {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    padding: 10px;
+}
+
+.hello {
+    // display: flex;
+    // align-items: center;
+    // justify-content: center;
+    &__logo {
+        text-align: center;
+    }
+    &_content {}
+
+    .hello-content {
+        &__title {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 900;
+            text-align: center;
+        }
+        &__description {
+            text-align: center;
+        }
+    }
+}
