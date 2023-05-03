@@ -67,17 +67,19 @@ function getHashtagsArray() {
 };
 
 async function sendImageToTelegram(photoUrl, hashtagsArray) {
-    const { tgToken, chatId } = await new Promise(resolve => {
-        chrome.storage.sync.get(['tgToken', 'chatId'], resolve);
+    const { botToken, chatId } = await new Promise(resolve => {
+        chrome.storage.sync.get(['botToken', 'chatId'], resolve);
     });
 
-    if (!tgToken || !chatId) {
+    console.log(botToken, chatId)
+
+    if (!botToken || !chatId) {
         console.log('Missing Telegram API key or chat ID');
         return;
     }
 
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', `https://api.telegram.org/bot${tgToken}/sendPhoto`, true);
+    xhr.open('POST', `https://api.telegram.org/bot${botToken}/sendPhoto`, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
 
     const captionText = Object.values(hashtagsArray).flat().join(' ');
@@ -97,10 +99,10 @@ async function sendImageToTelegram(photoUrl, hashtagsArray) {
 const downloadButton = createButton();
 const imageUrl = getImageUrl()
 
-downloadButton.addEventListener('click', function () {
+downloadButton.addEventListener('click', async function () {
     if (imageUrl) {
         const hashtagsArray = getHashtagsArray();
-        sendImageToTelegram(imageUrl, hashtagsArray);
+        await sendImageToTelegram(imageUrl, hashtagsArray);
     } else {
         console.error('Image url is empty');
     }
