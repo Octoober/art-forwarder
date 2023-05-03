@@ -37,7 +37,7 @@ import './popup.scss';
                 return;
             }
 
-            showNotification('Token or Chat ID incorrect.', 'success');
+            showNotification('Config save successfully', 'success');
         });
     };
 
