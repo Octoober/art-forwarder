@@ -1,5 +1,7 @@
 import './popup.scss';
 
+
+// TODO: Code review is required!
 (function () {
     const tokenInput = document.querySelector('input.tg-token');
     const chatIdInput = document.querySelector('input.chat-id');
