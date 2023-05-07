@@ -2,34 +2,72 @@
 import { TelegramImageSender } from '../utils/TelegramImageSender';
 import TelegramIcon from './icons/Telegram';
 import { selectors } from '../selectors';
-import { getImageUrlBySelector, getHashtagsArray } from '../utils/helpers';
+import { getImageUrlBySelector, getHashtagsArray, saveToCollection } from '../utils/helpers';
 
 export default {
     components: {
         TelegramIcon
     },
     setup() {
-        function sendImageToTelegram() {
-            console.log('before send')
-            const telegramSender = new TelegramImageSender()
-            const imageUrl = getImageUrlBySelector(selectors.image);
-
-            const hashtagsArray = {
-                character: getHashtagsArray(selectors.tags.character),
-                copyright: getHashtagsArray(selectors.tags.copyright)
-            }
-
+        /**
+         * Отправляет коллекциб в телеграм. Добавляет текущее медиа в коллекцию и отправляет.
+         */
+        async function sendImageToTelegram() {
+            console.clear()
+            // const tagString = getHashtagsArray(selectors.tags.character).concat(getHashtagsArray(selectors.tags.copyright)).join(' ');
             try {
-                // TODO: Перенести запрос в background.js, чтобы отправка запроса не останавливалась после закрытия вкладки.
-                telegramSender.sendImage(imageUrl, hashtagsArray);
+                // const tagsString = [...tags].join(' ');
+                // Remove duplicate tags
+                // const tags = new Set([...getHashtagsArray(selectors.tags.character), ...getHashtagsArray(selectors.tags.copyright)]);
+                const telegramSender = new TelegramImageSender()
+
+                await this.addToCollectionTest();
+
+                const { postCollection } = await chrome.storage.local.get('postCollection');
+                telegramSender.sendImage(postCollection)
             } catch (error) {
-                // TODO: Отображать ошибкти
+                // TODO: Отображать ошибки на странице
                 console.error(error)
             }
         }
 
+        async function addToCollectionTest() {
+            try {
+                const media = getImageUrlBySelector(selectors.image);
+                await saveToCollection(window.location.href, 'photo', media, 'test caption');
+            } catch (error) {
+                console.log('test error')
+            }
+        }
+        async function saveToCollection(pageUrl, type, media, caption) {
+            try {
+                const { postCollection } = await chrome.storage.local.get('postCollection') || {};
+
+                // Выполняется если postCollection существует, а так же имеет в себе такой же pageUrl
+                if (!ignore && postCollection && postCollection.some(post => post.pageUrl === pageUrl)) {
+                    throw new Error('This pageUrl already in the collection');
+                }
+
+                // Если postCollection существует - перезаписываем его в новую переменную,
+                // в противном случае записываем пустую переменную
+                const newPostCollection = postCollection ? [...postCollection] : [];
+
+                // Добавляет новые значения в коллекцию
+                newPostCollection.push({ pageUrl, type, media, caption });
+
+                // Обнавляет коллекцию в хранилище
+                await chrome.storage.local.set({ postCollection: newPostCollection }, () => {
+                    console.log('Successfully added to the collection');
+                });
+            } catch (error) {
+                console.error(error)
+                throw new Error('Unable to save photo to collection! Please try again later.');
+            }
+        }
+
         return {
-            sendImageToTelegram
+            sendImageToTelegram,
+            addToCollectionTest
         }
     }
 }
@@ -46,9 +84,9 @@ export default {
                 <button @click="sendImageToTelegram" title="Send this art to Telegram" class="button button--main">
                     <TelegramIcon />
                 </button>
-                <ul v-show="false" class="menu__sub-list">
+                <ul class="menu__sub-list">
                     <li class="menu__sub-item">
-                        <button class="button button--sub">+</button>
+                        <button @click="addToCollectionTest" class="button button--sub">+</button>
                     </li>
                 </ul>
             </li>

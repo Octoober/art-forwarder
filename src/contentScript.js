@@ -8,7 +8,8 @@ function createWrapper() {
     document.body.appendChild(extensionUiWrapper);
 }
 
-window.addEventListener('load', createWrapper);
+// window.addEventListener('load', createWrapper);
+createWrapper()
 createApp(Content).mount('#AAF')
 
 

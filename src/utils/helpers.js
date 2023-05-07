@@ -50,3 +50,37 @@ export function getImageUrlBySelector(selectors) {
     const imageElement = document.querySelector(selectors.join(','));
     return imageElement ? imageElement.src : null;
 }
+
+/**
+ * Группирует отдельные посты в локальном хранилище для дальнейшей публикации их единой группой.
+ *
+ * @param {string} pageUrl - Ссылка на страницу.
+ * @param {string} type - Тип медиа контента (photo, video).
+ * @param {string} media - Строка c URL на медиа, которые следует опубликовать.
+ * @param {string} caption - Описание, которое будет отображаться у опубликованных постов.
+ */
+export async function saveToCollection(pageUrl, type, media, caption) {
+    try {
+        const { postCollection } = await chrome.storage.local.get('postCollection') || {};
+
+        // Выполняется если postCollection существует, а так же имеет в себе такой же pageUrl
+        if (postCollection && postCollection.some(post => post.pageUrl === pageUrl)) {
+            throw new Error('This pageUrl already in the collection');
+        }
+
+        // Если postCollection существует - перезаписываем его в новую переменную,
+        // в противном случае записываем пустую переменную
+        const newPostCollection = postCollection ? [...postCollection] : [];
+
+        // Добавляет новые значения в коллекцию
+        newPostCollection.push({ pageUrl, type, media, caption });
+
+        // Обнавляет коллекцию в хранилище
+        await chrome.storage.local.set({ postCollection: newPostCollection }, () => {
+            console.log('Successfully added to the collection');
+        });
+    } catch (error) {
+        console.error(error)
+        throw new Error('Unable to save photo to collection! Please try again later.');
+    }
+}
