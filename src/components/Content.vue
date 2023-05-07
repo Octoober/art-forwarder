@@ -1,7 +1,7 @@
 <script>
 import { TelegramImageSender } from '../utils/TelegramImageSender';
 import TelegramIcon from './icons/Telegram';
-import { selectors } from '../selectors';
+import { SELECTORS } from '../constants';
 import { getImageUrlBySelector, getHashtagsArray, saveToCollection } from '../utils/helpers';
 
 export default {
@@ -33,7 +33,7 @@ export default {
 
         async function addToCollectionTest() {
             try {
-                const media = getImageUrlBySelector(selectors.image);
+                const media = getImageUrlBySelector(SELECTORS.image);
                 await saveToCollection(window.location.href, 'photo', media, 'test caption');
             } catch (error) {
                 console.log('test error')
