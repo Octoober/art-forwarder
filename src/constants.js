@@ -1,4 +1,4 @@
-export const TELEGRAM_API_URL = 'https://api.telegram.org/bot/'
+export const TELEGRAM_API_URL = 'https://api.telegram.org/bot'
 
 export const SELECTORS = {
     image: ['img#image', 'img.fit-width'],
