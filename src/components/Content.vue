@@ -5,7 +5,7 @@ import { TelegramImageSender } from '../utils/TelegramImageSender';
 import { MediaGroup } from '../utils/MediaGroup';
 import TelegramIcon from './icons/Telegram';
 import { SELECTORS } from '../constants';
-import { getImageUrlBySelector, getHashtagsArray } from '../utils/helpers';
+import { getImageUrlBySelector, getHashtags, removeDuplicateTags } from '../utils/helpers';
 
 export default {
     components: {
@@ -22,23 +22,18 @@ export default {
 
             try {
                 const mediaUrl = getImageUrlBySelector(SELECTORS.image);
+                const tags = getHashtags(SELECTORS.tags);
+
                 const telegramSender = new TelegramImageSender();
                 const mediaGroup = new MediaGroup();
 
-                // const newMediaItem = group ? [...group, {type: 'photo', mediaUrl: mediaUrl, caption: 'Test a dabble send'}] : {type: 'photo', mediaUrl: mediaUrl, caption: 'Test a dabble send'}
-                // const newGroup = [...group, {type: 'photo', mediaUrl: mediaUrl, caption: 'Test a dabble send'}];
                 const mediaItem = {
                     type: 'photo',
                     mediaUrl: mediaUrl,
-                    caption: 'test a double'
+                    caption: tags.join(' ')
                 };
-
-
-                // const updatedGroup = [...group, mediaItem];
-
                 await mediaGroup.addMedia(mediaItem);
                 const group = await mediaGroup.getMediaGroup();
-
 
                 telegramSender.sendImage(group).then(result => {
                     console.log(result)
@@ -59,11 +54,12 @@ export default {
             console.log('Added:', isAddedToGroup.value)
             try {
                 const mediaUrl = getImageUrlBySelector(SELECTORS.image);
+                const tags = getHashtags(SELECTORS.tags);
                 const mediaGroup = new MediaGroup();
                 const mediaItem = {
                     type: 'photo',
                     mediaUrl: mediaUrl,
-                    caption: 'test a MediaGroup class'
+                    caption: tags.join(' ')
                 };
 
                 if (isAddedToGroup.value) {
@@ -91,12 +87,6 @@ export default {
             });
         }
 
-        onMounted(() => {
-            // chrome.storage.local.clear(() => {
-            //     console.log('Storage clear')
-            // });
-        })
-
         return {
             sendImageToTelegram,
             updateGroupMedia,
@@ -108,7 +98,7 @@ export default {
 </script>
 
 <template>
-    <button @click="clearLocalStorage" class="clear-storage">clear</button>
+    <button @click="clearLocalStorage" class="clear-storage">Clear</button>
 
     <div v-show="false" class="counter">
         <div class="counter__value">4</div>
@@ -137,8 +127,6 @@ export default {
 .anime-art-forwarder {
     position: fixed;
     top: 20px;
-    right: 0;
-    // left: calc(100% - 130px);
     padding: 0 5px 7px 5px;
     user-select: none;
 
@@ -147,7 +135,7 @@ export default {
     align-items: center;
     justify-content: center;
 
-    opacity: .7;
+    opacity: .8;
     transition-delay: .5s;
 
     &:hover {
@@ -158,15 +146,18 @@ export default {
 </style>
 
 <style lang="scss" scoped>
+
 * {
     margin: 0;
     padding: 0;
     list-style: none;
+
+    font-weight: normal;
+    font-style: normal;
 }
 
 .clear-storage {
     position: fixed;
-    right: 10px;
     bottom: 10px;
     padding: 5px 20px;
 }
@@ -208,6 +199,14 @@ export default {
     &--main {
         width: 50px;
         height: 50px;
+        fill: #229ED9;
+        position: relative;
+        z-index: 1;
+    }
+    &--sub {
+        color: #fff;
+        background-color: #0088CC;
+        font-weight: bold;
     }
 }
 
@@ -225,19 +224,12 @@ export default {
     }
 
     &__item {
-        .button {
-            &--main {
-                position: relative;
-                z-index: 1;
-            }
-        }
     }
 
     &__sub-list {
         text-align: center;
-
         &:hover .button {
-            background-color: red;
+            background-color: #179CDE;
         }
     }
 

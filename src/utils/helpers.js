@@ -18,10 +18,12 @@ export function toHashtag(text) {
  * @param {string[]} selectors - Массив CSS-селектров, которые необходимо найти на странице.
  * @returns {string[]} - Массив хэштегов.
  */
-export function getHashtagsArray(selectors) {
+export function getHashtags(selectors) {
     const hashtags = [];
 
-    selectors.forEach(selector => {
+    const tegs = Object.values(selectors).flat();
+
+    tegs.forEach(selector => {
         const elements = document.querySelectorAll(selector);
         if (elements.length === 0) return;
 
@@ -35,7 +37,7 @@ export function getHashtagsArray(selectors) {
                 hashtags.push(hashtagText);
             }
         });
-    })
+    });
 
     return hashtags;
 }
@@ -83,4 +85,17 @@ export async function saveToCollection(pageUrl, type, media, caption) {
         console.error(error)
         throw new Error('Unable to save photo to collection! Please try again later.');
     }
+}
+
+/**
+ * Removes duplicate tags from a media group.
+ *
+ * @param {Array} mediaGroup - An array of media items.
+ * @returns {Array} An array of unique tags.
+ */
+export function removeDuplicateTags(mediaGroup) {
+    const allTags = mediaGroup.flatMap(item => item.caption.split(' '));
+    const uniqueTags = [...new Set(allTags)];
+
+    return uniqueTags;
 }

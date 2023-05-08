@@ -1,4 +1,5 @@
-import { TELEGRAM_API_URL } from '../constants'
+import { TELEGRAM_API_URL, TAGS} from '../constants';
+import { removeDuplicateTags } from './helpers';
 /**
  * A collection of image URLs and associated tags.
  *
@@ -19,18 +20,18 @@ export class TelegramImageSender {
     async sendImage(mediaGroup) {
         const { botToken, chatId } = await chrome.storage.sync.get(['botToken', 'chatId']);
 
+        const uniqueTags = removeDuplicateTags(mediaGroup).join(' ');
+
         const mediaData = mediaGroup.map((item, index) => ({
             type: item.type,
             media: item.mediaUrl,
-            caption: index === 0 ? item.caption : ''
+            caption: index === 0 ? uniqueTags : ''
         }));
 
         const requestBody = JSON.stringify({
             chat_id: chatId,
             media: mediaData
         });
-
-        console.log(requestBody);
 
         try {
             const response = await fetch(TELEGRAM_API_URL + botToken + '/sendMediaGroup', {
