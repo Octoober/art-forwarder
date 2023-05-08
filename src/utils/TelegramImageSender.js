@@ -16,21 +16,21 @@ export class TelegramImageSender {
      * @returns {Promise<string>}
      * @throws {Error} If request error.
      */
-    async sendImage(postCollection) {
-        const { botToken, chatId } = await new Promise(resolve => {
-            chrome.storage.sync.get(['botToken', 'chatId'], resolve);
-        });
+    async sendImage(mediaGroup) {
+        const { botToken, chatId } = await chrome.storage.sync.get(['botToken', 'chatId']);
 
-        const mediaData = postCollection.map((post, index) => ({
-            type: post.type,
-            media: post.media,
-            caption: index === 0 ? post.caption : ''
+        const mediaData = mediaGroup.map((item, index) => ({
+            type: item.type,
+            media: item.mediaUrl,
+            caption: index === 0 ? item.caption : ''
         }));
 
         const requestBody = JSON.stringify({
             chat_id: chatId,
             media: mediaData
         });
+
+        console.log(requestBody);
 
         try {
             const response = await fetch(TELEGRAM_API_URL + botToken + '/sendMediaGroup', {
@@ -42,8 +42,12 @@ export class TelegramImageSender {
             });
 
             if (response.ok) {
-                await chrome.storage.local.clear();
-                console.log('Storage cleared.')
+                // await chrome.storage.local.clear();
+                // console.log('Storage cleared.')
+                return {success: true, message: 'Success a send the media group.'};
+            } else {
+                console.error(response);
+                return {success: false, message: 'Error send a media group.'};
             }
         } catch (error) {
             throw new Error(`Request error: ${error}`);

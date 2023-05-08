@@ -1,54 +1,115 @@
 <script>
+import { ref, onMounted } from 'vue';
+
 import { TelegramImageSender } from '../utils/TelegramImageSender';
+import { MediaGroup } from '../utils/MediaGroup';
 import TelegramIcon from './icons/Telegram';
 import { SELECTORS } from '../constants';
-import { getImageUrlBySelector, getHashtagsArray, saveToCollection } from '../utils/helpers';
+import { getImageUrlBySelector, getHashtagsArray } from '../utils/helpers';
 
 export default {
     components: {
         TelegramIcon
     },
     setup() {
+        let isAddedToGroup = ref(false);
+
         /**
          * Отправляет коллекциб в телеграм. Добавляет текущее медиа в коллекцию и отправляет.
          */
         async function sendImageToTelegram() {
             console.clear()
-            // const tagString = getHashtagsArray(selectors.tags.character).concat(getHashtagsArray(selectors.tags.copyright)).join(' ');
+
             try {
-                // const tagsString = [...tags].join(' ');
-                // Remove duplicate tags
-                // const tags = new Set([...getHashtagsArray(selectors.tags.character), ...getHashtagsArray(selectors.tags.copyright)]);
-                const telegramSender = new TelegramImageSender()
+                const mediaUrl = getImageUrlBySelector(SELECTORS.image);
+                const telegramSender = new TelegramImageSender();
+                const mediaGroup = new MediaGroup();
 
-                await this.addToCollectionTest();
+                // const newMediaItem = group ? [...group, {type: 'photo', mediaUrl: mediaUrl, caption: 'Test a dabble send'}] : {type: 'photo', mediaUrl: mediaUrl, caption: 'Test a dabble send'}
+                // const newGroup = [...group, {type: 'photo', mediaUrl: mediaUrl, caption: 'Test a dabble send'}];
+                const mediaItem = {
+                    type: 'photo',
+                    mediaUrl: mediaUrl,
+                    caption: 'test a double'
+                };
 
-                const { postCollection } = await chrome.storage.local.get('postCollection');
-                telegramSender.sendImage(postCollection)
+
+                // const updatedGroup = [...group, mediaItem];
+
+                await mediaGroup.addMedia(mediaItem);
+                const group = await mediaGroup.getMediaGroup();
+
+
+                telegramSender.sendImage(group).then(result => {
+                    console.log(result)
+                    if (result.success) {
+                        chrome.storage.local.clear(() => {
+                            console.log('Storage clear');
+                            isAddedToGroup.value = false;
+                        });
+                    }
+                });
             } catch (error) {
                 // TODO: Отображать ошибки на странице
                 console.error(error)
             }
         }
 
-        async function addToCollectionTest() {
+        async function updateGroupMedia() {
+            console.log('Added:', isAddedToGroup.value)
             try {
-                const media = getImageUrlBySelector(SELECTORS.image);
-                await saveToCollection(window.location.href, 'photo', media, 'test caption');
+                const mediaUrl = getImageUrlBySelector(SELECTORS.image);
+                const mediaGroup = new MediaGroup();
+                const mediaItem = {
+                    type: 'photo',
+                    mediaUrl: mediaUrl,
+                    caption: 'test a MediaGroup class'
+                };
+
+                if (isAddedToGroup.value) {
+                    mediaGroup.removeMedia(mediaUrl).then(result => {
+                        console.log(result)
+                        isAddedToGroup.value = false;
+                    });
+                } else {
+                    mediaGroup.addMedia(mediaItem).then(result => {
+                        if (result.success) {
+                            console.log(result)
+                            isAddedToGroup.value = true;
+                        }
+                    });
+                }
+
             } catch (error) {
-                console.log('test error')
+                console.log(error)
             }
         }
 
+        function clearLocalStorage() {
+            chrome.storage.local.clear(() => {
+                console.log('Storage clear')
+            });
+        }
+
+        onMounted(() => {
+            // chrome.storage.local.clear(() => {
+            //     console.log('Storage clear')
+            // });
+        })
+
         return {
             sendImageToTelegram,
-            addToCollectionTest
+            updateGroupMedia,
+            isAddedToGroup,
+            clearLocalStorage,
         }
     }
 }
 </script>
 
 <template>
+    <button @click="clearLocalStorage" class="clear-storage">clear</button>
+
     <div v-show="false" class="counter">
         <div class="counter__value">4</div>
         <div class="counter__arrow-down"></div>
@@ -61,7 +122,10 @@ export default {
                 </button>
                 <ul class="menu__sub-list">
                     <li class="menu__sub-item">
-                        <button @click="addToCollectionTest" class="button button--sub">+</button>
+                        <button @click="updateGroupMedia" class="button button--sub">
+                            <div v-if="isAddedToGroup">-</div>
+                            <div v-else>+</div>
+                        </button>
                     </li>
                 </ul>
             </li>
@@ -98,6 +162,13 @@ export default {
     margin: 0;
     padding: 0;
     list-style: none;
+}
+
+.clear-storage {
+    position: fixed;
+    right: 10px;
+    bottom: 10px;
+    padding: 5px 20px;
 }
 
 .counter {

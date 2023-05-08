@@ -1,6 +1,5 @@
 /**
  * @typedef {Object} MediaItem
- * @property {string} pageUrl - The URL of the page where the post is located.
  * @property {string} type - The type of media (e.g. "photo" or "video").
  * @property {string} mediaUrl - The URL of the media file.
  * @property {string} caption - The caption for the media.
@@ -14,25 +13,60 @@ export class MediaGroup {
      * @param {MediaItem} mediaItem - An object containing information about the new post.
      * @throws {Error}
      */
-    async addMedia({ pageUrl, type, mediaUrl, caption }) { }
+    async addMedia({ type, mediaUrl, caption }) {
+        try {
+            const group = await this.getMediaGroup();
+
+            if (group.find(item => item.mediaUrl === mediaUrl)) {
+                return { success: false, message: 'A media already exists in the group.' };
+                // throw new Error('A media already exists in the group.');
+            }
+            const updatedGroup = [...group, { type, mediaUrl, caption }];
+            await this.saveMedia(updatedGroup);
+
+            return { success: true, message: 'Successfully added media to the group.' };
+        } catch (error) {
+            console.error(error);
+            return { success: false, message: 'Unable to add media to group. Please try again later.' };
+        }
+    }
 
     /**
-     * Remove a post from the group by its pageUrl.
+     * Remove a post from the group by its mediaUrl.
      *
-     * @param {string} pageUrl
+     * @param {string} mediaUrl - The mediaUrl of the media to remove.
      */
-    async removeMedia(pageUrl) { }
+    async removeMedia(mediaUrl) {
+        try {
+            const group = await this.getMediaGroup();
+            const updatedGroup = group.filter((media) => media.mediaUrl !== mediaUrl);
+
+            await this.saveMedia(updatedGroup);
+
+            return { success: true, message: 'Successfully removed media from the group.' };
+        } catch (error) {
+            console.error(error);
+            return { success: false, message: 'Unable to remove media from group.' };
+        }
+    }
 
     /**
      * Get a current array of posts in the group.
+     *
+     * @returns {Promise<MediaItem[]>}
      */
-    async getMedia() { }
+    async getMediaGroup() {
+        const data = await chrome.storage.local.get('mediaGroup');
+        return data?.mediaGroup || [];
+    }
 
     /**
-     * Save an array of posts to the Chrome storage.
+     * Save an array of media group to the Chrome storage.
      *
-     * @param {Array} posts - An array of posts objects to be saved.
-     * @throws {Error} If the posts cannot be saved to the Chrome storage.
+     * @param {MediaItem[]} mediaGroup - An array of media group objects to be saved.
+     * @throws {Error} If the media cannot be saved to the Chrome storage.
      */
-    async saveMedia(posts) { }
+    async saveMedia(mediaGroup) {
+        await chrome.storage.local.set({ mediaGroup });
+    }
 }
