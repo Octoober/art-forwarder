@@ -30,7 +30,9 @@ export class TelegramImageSender {
 
         const requestBody = JSON.stringify({
             chat_id: chatId,
-            media: mediaData
+            media: mediaData,
+            parse_mode: 'Markdown',
+            schedule_date: Date.now() + 86400000
         });
 
         try {

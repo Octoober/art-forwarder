@@ -87,6 +87,21 @@ export default {
             });
         }
 
+        function updateParentPosition() {
+            const imageElement = document.querySelector(SELECTORS.image);
+            const imageRect = imageElement.getBoundingClientRect();
+            const parentElement = document.querySelector('#AAF');
+
+            parentElement.style.left = imageRect.right - 80 + 'px';
+            parentElement.style.top = imageRect.top + 10 + 'px';
+            parentElement.style.display = 'block';
+        }
+
+        onMounted(() => {
+            updateParentPosition();
+            window.addEventListener('resize', updateParentPositions);
+        });
+
         return {
             sendImageToTelegram,
             updateGroupMedia,
@@ -125,8 +140,9 @@ export default {
 
 <style lang="scss">
 .anime-art-forwarder {
-    position: fixed;
-    top: 20px;
+    display: none;
+    position: absolute;
+    // top: 35%;
     padding: 0 5px 7px 5px;
     user-select: none;
 
@@ -137,6 +153,7 @@ export default {
 
     opacity: .8;
     transition-delay: .5s;
+    z-index: 10000;
 
     &:hover {
         opacity: 1;
@@ -146,7 +163,6 @@ export default {
 </style>
 
 <style lang="scss" scoped>
-
 * {
     margin: 0;
     padding: 0;
@@ -154,6 +170,16 @@ export default {
 
     font-weight: normal;
     font-style: normal;
+}
+
+aaf-button {
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    align-items: center;
+    cursor: pointer;
+    line-height: 1.2;
 }
 
 .clear-storage {
@@ -196,6 +222,8 @@ export default {
     border: none;
     box-shadow: 0 4px 10px rgba(#000, .3);
 
+
+
     &--main {
         width: 50px;
         height: 50px;
@@ -203,6 +231,7 @@ export default {
         position: relative;
         z-index: 1;
     }
+
     &--sub {
         color: #fff;
         background-color: #0088CC;
@@ -223,11 +252,11 @@ export default {
         }
     }
 
-    &__item {
-    }
+    &__item {}
 
     &__sub-list {
         text-align: center;
+
         &:hover .button {
             background-color: #179CDE;
         }

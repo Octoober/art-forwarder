@@ -11,9 +11,8 @@ function createWrapper() {
 window.onload = () => {
     createWrapper()
     createApp(Content).mount('#AAF')
-    // console.log(document.querySelector('#AAF').offsetWidth)
 
     const wrapperElement = document.querySelector('#AAF');
-    wrapperElement.style.left = document.documentElement.clientWidth - (wrapperElement.offsetWidth + 10) + 'px'
+    // wrapperElement.style.left = document.documentElement.clientWidth - (wrapperElement.offsetWidth + 10) + 'px'
 
 }
