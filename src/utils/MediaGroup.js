@@ -17,12 +17,17 @@ export class MediaGroup {
         try {
             const group = await this.getMediaGroup();
 
+            // if (group.length > 10) {
+            //     return { success: false, message: 'Media group is full' };
+            // }
+
             if (group.find(item => item.mediaUrl === mediaUrl)) {
                 return { success: false, message: 'A media already exists in the group.' };
                 // throw new Error('A media already exists in the group.');
             }
             const updatedGroup = [...group, { type, mediaUrl, caption }];
-            await this.saveMedia(updatedGroup);
+            if (group.length <= 10)
+                await this.saveMedia(updatedGroup);
 
             return { success: true, message: 'Successfully added media to the group.' };
         } catch (error) {

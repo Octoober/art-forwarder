@@ -1,4 +1,4 @@
-import { TELEGRAM_API_URL, TAGS} from '../constants';
+import { TELEGRAM_API_URL, TAGS } from '../constants';
 import { removeDuplicateTags } from './helpers';
 /**
  * A collection of image URLs and associated tags.
@@ -10,6 +10,23 @@ import { removeDuplicateTags } from './helpers';
 
 /** A class for sending of images to a Telegram channel or chat. */
 export class TelegramImageSender {
+    _createRequestBody(chatId, mediaGroup) {
+        const uniqueTags = removeDuplicateTags(mediaGroup).join(' ');
+
+        const mediaData = mediaGroup.map((item, index) => ({
+            type: item.type,
+            media: item.mediaUrl,
+            caption: index === 0 ? uniqueTags : ''
+        }));
+
+        return JSON.stringify({
+            chat_id: chatId,
+            media: mediaData,
+            parse_mode: 'Markdown',
+            schedule_date: Date.now() + 86400000
+        });
+    }
+
     /**
      * Send an array images to the Telegram channel/chat.
      *
@@ -20,40 +37,24 @@ export class TelegramImageSender {
     async sendImage(mediaGroup) {
         const { botToken, chatId } = await chrome.storage.sync.get(['botToken', 'chatId']);
 
-        const uniqueTags = removeDuplicateTags(mediaGroup).join(' ');
+        const requestBody = this._createRequestBody(chatId, mediaGroup);
 
-        const mediaData = mediaGroup.map((item, index) => ({
-            type: item.type,
-            media: item.mediaUrl,
-            caption: index === 0 ? uniqueTags : ''
-        }));
-
-        const requestBody = JSON.stringify({
-            chat_id: chatId,
-            media: mediaData,
-            parse_mode: 'Markdown',
-            schedule_date: Date.now() + 86400000
-        });
-
-        try {
-            const response = await fetch(TELEGRAM_API_URL + botToken + '/sendMediaGroup', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: requestBody
+        return fetch(TELEGRAM_API_URL + botToken + '/sendMediaGroup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: requestBody
+        })
+            .then(response => {
+                if (response.ok) {
+                    return { success: true, message: 'Success a send the media group.' };
+                } else {
+                    return { success: false, message: 'Error send a media group.' };
+                }
+            })
+            .catch(error => {
+                return { success: false, message: `Request error: ${error}` };
             });
-
-            if (response.ok) {
-                // await chrome.storage.local.clear();
-                // console.log('Storage cleared.')
-                return {success: true, message: 'Success a send the media group.'};
-            } else {
-                console.error(response);
-                return {success: false, message: 'Error send a media group.'};
-            }
-        } catch (error) {
-            throw new Error(`Request error: ${error}`);
-        }
     }
 }
