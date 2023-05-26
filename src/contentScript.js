@@ -1,5 +1,5 @@
 import { createApp } from 'vue';
-import Content from './components/Content.vue';
+import AppContent from './views/AppContent.vue';
 
 function createWrapper() {
     const extensionUiWrapper = document.createElement('div');
@@ -11,9 +11,7 @@ function createWrapper() {
 
 window.onload = () => {
     createWrapper()
-    createApp(Content).mount('#AAF')
+    createApp(AppContent).mount('#AAF')
 
     const wrapperElement = document.querySelector('#AAF');
-    // wrapperElement.style.left = document.documentElement.clientWidth - (wrapperElement.offsetWidth + 10) + 'px'
-
 }

@@ -1,4 +1,7 @@
 import { TelegramImageSender } from './utils/TelegramImageSender';
+import { ERROR_LEVELS } from './constants';
+
+const telegramSender = new TelegramImageSender();
 
 const parentMenuItem = chrome.contextMenus.create({
     id: "myContextMenuItem",
@@ -17,26 +20,34 @@ chrome.contextMenus.create({
     contexts: ["image"],
 });
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.type === 'send-media') {
-        const telegramSender = new TelegramImageSender();
-
-        telegramSender.sendImage(request.data)
-            .then(response => {
-                sendResponse(response);
-
-                if (response.success) {
-                    chrome.tabs.query({}, tabs => {
-                        for (const tab of tabs) {
-                            chrome.tabs.sendMessage(tab.id, { type: 'tabs-update' });
-                        }
-                    });
-                }
-            })
-            .catch(error => {
-                console.error(error);
-                sendResponse(error);
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.type === 'send-media') {
+        try {
+            // POST request to telegram
+            telegramSender.sendMedia(message.data).then(response => {
+                // Send response from telegram api
+                sendResponse(response)
+                // Send event to all tabs for updating vars
+                chrome.tabs.query({}, tabs => {
+                    for (const tab of tabs) {
+                        chrome.tabs.sendMessage(tab.id, { type: 'update-tabs', data: response });
+                    }
+                });
             });
+        } catch (error) {
+            console.error(error);
+            sendResponse({level: ERROR_LEVELS.ERROR, error});
+        }
+        return true
     }
-    return true;
+
+    if (message.type === 'update-group') {
+        chrome.tabs.query({}, tabs => {
+            for (const tab of tabs) {
+                chrome.tabs.sendMessage(tab.id, { type: 'update-tabs', data: [] });
+            }
+        });
+
+        return true;
+    }
 });

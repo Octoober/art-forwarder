@@ -1,4 +1,4 @@
-import './popup.scss';
+import './views/styles/popup.scss';
 
 
 // TODO: Code review is required!

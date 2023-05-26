@@ -99,3 +99,25 @@ export function removeDuplicateTags(mediaGroup) {
 
     return uniqueTags;
 }
+
+/**
+ * Adjusts the position of `parentElement` relative to `targetElement`.
+ *
+ * @param {Element} parentElement - The element that needs to be repositioned.
+ * @param {Element} targetElement - The element relative to which the `parentElement` is positioned.
+ *
+ * @returns {void}
+ */
+export function positionRelativeToTarget(parentElement, targetElement) {
+    if (!parentElement || !targetElement) return;
+
+    const targetRect = targetElement.getBoundingClientRect();
+
+    const scrollX = window.scrollX || window.pageXOffset;
+    const scrollY = window.scrollY || window.pageYOffset;
+
+    parentElement.style.left = targetRect.right - 80 + scrollX + 'px';
+    parentElement.style.top = targetRect.top + 10 + scrollY + 'px';
+
+    parentElement.style.display = 'block';
+}

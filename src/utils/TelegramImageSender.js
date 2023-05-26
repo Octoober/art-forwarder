@@ -1,4 +1,4 @@
-import { TELEGRAM_API_URL, TAGS } from '../constants';
+import { TELEGRAM_API_URL, ERROR_LEVELS } from '../constants';
 import { removeDuplicateTags } from './helpers';
 /**
  * A collection of image URLs and associated tags.
@@ -28,16 +28,18 @@ export class TelegramImageSender {
     }
 
     /**
-     * Send an array images to the Telegram channel/chat.
+     * Send an array media to the Telegram channel/chat.
      *
      * @param {postCollection} collection
      * @returns {Promise<string>}
      * @throws {Error} If request error.
      */
-    async sendImage(mediaGroup) {
+    async sendMedia(mediaGroup) {
         const { botToken, chatId } = await chrome.storage.sync.get(['botToken', 'chatId']);
 
         const requestBody = this._createRequestBody(chatId, mediaGroup);
+
+        // return { level: ERROR_LEVELS.WARNING, message: 'Success a send the media group. ' + new Date().getTime() };
 
         return fetch(TELEGRAM_API_URL + botToken + '/sendMediaGroup', {
             method: 'POST',
@@ -48,13 +50,15 @@ export class TelegramImageSender {
         })
             .then(response => {
                 if (response.ok) {
-                    return { success: true, message: 'Success a send the media group.' };
+                    return { level: ERROR_LEVELS.SUCCESS, message: 'Success a send the media group.' };
                 } else {
-                    return { success: false, message: 'Error send a media group.' };
+                    console.error(response);
+                    return { level: ERROR_LEVELS.ERROR, message: 'Error send a media group.' };
                 }
             })
             .catch(error => {
-                return { success: false, message: `Request error: ${error}` };
+                console.error(error);
+                return { level: ERROR_LEVELS.ERROR, message: `Request error: ${error}` };
             });
     }
 }
