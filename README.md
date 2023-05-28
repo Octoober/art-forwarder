@@ -83,8 +83,8 @@ It is **recommended** to always use the unique identifier (Chat ID) as the bot w
 
 ## Upcoming Features
 - [ ] UI improvements
-- [ ] Displaying errors and notifications
+- [x] Displaying errors and notifications
 - [ ] Support for multiple Chat IDs
 - [ ] Adding custom descriptions
-- [ ] Image grouping
+- [x] Image grouping
 - [ ] Ability to disable automatic tags

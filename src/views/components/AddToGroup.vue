@@ -1,5 +1,6 @@
 <script>
 import { inject } from 'vue';
+import { ERROR_LEVELS } from '../../constants';
 
 export default {
     props: {
@@ -22,9 +23,11 @@ export default {
                     ? await props.mediaGroup.removeMedia(props.mediaUrl)
                     : await props.mediaGroup.addMedia(mediaItem);
 
-                if (updatedGroup.success) {
+                const count = (await props.mediaGroup.getMediaGroup()).length
+
+                if (updatedGroup.level === ERROR_LEVELS.SUCCESS) {
                     isAddingToGroup.value = !isAddingToGroup.value;
-                    chrome.runtime.sendMessage({type: 'update-group'});
+                    chrome.runtime.sendMessage({type: 'update-group', data: {count}});
                 }
             } catch (error) {
                 console.log(error)

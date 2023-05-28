@@ -36,6 +36,7 @@ export default {
         }
 
         function clearLocalStorage(message) {
+            console.log(message);
             if (message.data.level === ERROR_LEVELS.SUCCESS) {
                 chrome.storage.local.clear(() => {
                     isAddingToGroup.value = false;

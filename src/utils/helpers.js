@@ -12,7 +12,7 @@ export function toHashtag(text) {
 }
 
 /**
- * Парсит теги и преобраует их подходящие для телеграма хэштеги.
+ * Парсит теги и преобраует их в подходящие для телеграма хэштеги.
  * Подходит для: rule34.xxx и danbooru.donmai.us
  *
  * @param {string[]} selectors - Массив CSS-селектров, которые необходимо найти на странице.
@@ -54,6 +54,7 @@ export function getImageUrlBySelector(selectors) {
 }
 
 /**
+ * ! DEPRECATED FUNCTION
  * Группирует отдельные посты в локальном хранилище для дальнейшей публикации их единой группой.
  *
  * @param {string} pageUrl - Ссылка на страницу.

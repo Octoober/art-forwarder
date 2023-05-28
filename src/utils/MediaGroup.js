@@ -1,3 +1,5 @@
+import { ERROR_LEVELS } from "../constants";
+
 /**
  * @typedef {Object} MediaItem
  * @property {string} type - The type of media (e.g. "photo" or "video").
@@ -17,22 +19,17 @@ export class MediaGroup {
         try {
             const group = await this.getMediaGroup();
 
-            // if (group.length > 10) {
-            //     return { success: false, message: 'Media group is full' };
-            // }
-
             if (group.find(item => item.mediaUrl === mediaUrl)) {
-                return { success: false, message: 'A media already exists in the group.' };
-                // throw new Error('A media already exists in the group.');
+                return { level: ERROR_LEVELS.WARNING, message: 'A media already exists in the group.' };
             }
             const updatedGroup = [...group, { type, mediaUrl, caption }];
             if (group.length <= 10)
                 await this.saveMedia(updatedGroup);
 
-            return { success: true, message: 'Successfully added media to the group.' };
+            return { level: ERROR_LEVELS.SUCCESS, message: 'Successfully added media to the group.' };
         } catch (error) {
             console.error(error);
-            return { success: false, message: 'Unable to add media to group. Please try again later.' };
+            return { level: ERROR_LEVELS.ERROR, message: 'Unable to add media to group. Please try again later.' };
         }
     }
 
@@ -48,10 +45,10 @@ export class MediaGroup {
 
             await this.saveMedia(updatedGroup);
 
-            return { success: true, message: 'Successfully removed media from the group.' };
+            return { level: ERROR_LEVELS.SUCCESS, message: 'Successfully removed media from the group.' };
         } catch (error) {
             console.error(error);
-            return { success: false, message: 'Unable to remove media from group.' };
+            return { level: ERROR_LEVELS.ERROR, message: 'Unable to remove media from group.' };
         }
     }
 

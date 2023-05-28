@@ -44,7 +44,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'update-group') {
         chrome.tabs.query({}, tabs => {
             for (const tab of tabs) {
-                chrome.tabs.sendMessage(tab.id, { type: 'update-tabs', data: [] });
+                chrome.tabs.sendMessage(tab.id, { type: 'update-tabs', data: null });
+
+                const count = message.data.count;
+                chrome.action.setBadgeText({
+                    text: count !== undefined && count > 0 ? count.toString() : ''
+                });
             }
         });
 

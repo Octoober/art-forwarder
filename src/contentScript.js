@@ -15,3 +15,7 @@ window.onload = () => {
 
     const wrapperElement = document.querySelector('#AAF');
 }
+
+console.log(
+    chrome.action?.setBadgeText
+);
