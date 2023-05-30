@@ -1,6 +1,7 @@
-import { TelegramImageSender } from './utils/TelegramImageSender';
-import { MediaGroup } from "./utils/MediaGroup";
+import { TelegramImageSender } from './services/TelegramImageSender';
+import { MediaGroup } from "./services/MediaGroup";
 import { ERROR_LEVELS } from './constants';
+import { Notification } from './models/Notification';
 
 const telegramSender = new TelegramImageSender();
 const mediaGroup = new MediaGroup();
@@ -22,27 +23,32 @@ chrome.contextMenus.create({
     contexts: ["image"],
 });
 
+
+// TODO: Code refactoring is needed
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'send-media') {
         try {
             // POST request to telegram
             telegramSender.sendMedia(message.data).then(response => {
+                console.log(response);
                 // Send response from telegram api
                 sendResponse(response)
 
                 if (response.level === ERROR_LEVELS.SUCCESS) {
                     // Send event to all tabs for updating vars
-                    chrome.tabs.query({}, tabs => {
-                        for (const tab of tabs) {
-                            chrome.tabs.sendMessage(tab.id, { type: 'clear-local-storage', data: {} });
-                            updateCount(0);
-                        }
+                    chrome.storage.local.clear(() => {
+                        updateCount(0);
+                        chrome.tabs.query({}, tabs => {
+                            for (const tab of tabs) {
+                                chrome.tabs.sendMessage(tab.id, { type: 'reset-to-default' });
+                            }
+                        });
                     });
                 }
             });
         } catch (error) {
             console.error(error);
-            sendResponse({ level: ERROR_LEVELS.ERROR, error });
+            sendResponse(new Notification(ERROR_LEVELS.ERROR, error))
         }
         return true
     }
@@ -52,10 +58,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         mediaGroup.getMediaGroup()
             .then(response => {
                 const mediaCount = response.length;
-                const isMediaExists = response.find(item => item.mediaUrl === mediaItem.mediaUrl);
+                const isMediaExists = response.find(item => item.url === mediaItem.url);
 
                 const operationPromise = isMediaExists
-                    ? mediaGroup.removeMedia(mediaItem.mediaUrl)
+                    ? mediaGroup.removeMedia(mediaItem.url)
                     : mediaGroup.addMedia(mediaItem);
 
                 operationPromise.then(result => {
@@ -67,6 +73,24 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
         return true;
     }
+
+    if (message && message.type === 'clear-local-storage') {
+        chrome.storage.local.clear(() => {
+            updateCount(0);
+            chrome.tabs.query({}, tabs => {
+                for (const tab of tabs) {
+                    chrome.tabs.sendMessage(tab.id, { type: 'reset-to-default' });
+                }
+            });
+        });
+    }
+});
+
+chrome.runtime.onInstalled.addListener(() => {
+    mediaGroup.getMediaGroup()
+        .then(response => response.length)
+        .then(count => updateCount(count))
+        .catch(error => console.error);
 });
 
 function updateCount(count) {

@@ -1,6 +1,7 @@
 <script>
 import { inject } from 'vue';
-import { TAGS } from '../../constants';
+import { MEDIA_TYPES, TAGS } from '../../constants';
+import { MediaItem } from '../../models/MediaItem';
 
 export default {
     props: {
@@ -16,12 +17,10 @@ export default {
         async function sendImageToTelegram() {
             try {
                 isSending.value = true;
-
-                const mediaUrl = props.mediaUrl;
-                const hashTags = TAGS ? props.hashTags.join(' ') : '';
                 let group = await props.mediaGroup.getMediaGroup();
+                const mediaItem = new MediaItem(MEDIA_TYPES.PHOTO, props.mediaUrl, props.hashTags.join(' '), '');
 
-                group = group.length !== 0 ? group : [{ type: 'photo', mediaUrl, caption: hashTags }];
+                group = group.length !== 0 ? group : [mediaItem];
 
                 chrome.runtime.sendMessage({ type: 'send-media', data: group }, response => {
                     notifications.value.push(response);

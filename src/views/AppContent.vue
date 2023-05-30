@@ -2,7 +2,7 @@
 import { ref, reactive, provide, onMounted } from 'vue';
 import { ERROR_LEVELS, SELECTORS } from '../constants';
 import { getImageUrlBySelector, getHashtags, positionRelativeToTarget } from '../utils/helpers';
-import { MediaGroup } from '../utils/MediaGroup';
+import { MediaGroup } from '../services/MediaGroup';
 
 import SendToTelegram from './components/SendToTelegram.vue';
 import AddToGroup from './components/AddToGroup.vue';
@@ -31,30 +31,39 @@ export default {
         provide('isSending', isSending);
 
         async function isMediaExists() {
-            const isExists = (await mediaGroup.getMediaGroup()).find(item => item.mediaUrl === mediaUrl);
+            const isExists = (await mediaGroup.getMediaGroup()).find(item => item.url === mediaUrl);
             isAddingToGroup.value = !!isExists;
         }
 
         function initEvents() {
             chrome.runtime.onMessage.addListener((message, sender, sendRequest) => {
-                if (message.type === 'clear-local-storage') {
-                    chrome.storage.local.clear(() => {
-                        isAddingToGroup.value = false;
-                        console.log('The storage has been cleared');
-                    });
-                }
+                // if (message.type === 'clear-local-storage') {
+                //     chrome.storage.local.clear(() => {
+                //         isAddingToGroup.value = false;
+                //         console.log('The storage has been cleared');
+                //     });
+                // }
 
                 if (message.type === 'update-count') {
                     mediaCount.value = message.data.count;
                 }
+
+                if (message.type === 'reset-to-default') resetToDefault();
             });
         }
 
-        function proxyClearLocalStorage() {
-            chrome.storage.local.clear(() => {
-                isAddingToGroup.value = false;
-                console.log('The storage has been cleared');
-            });
+        function clearStorage() {
+            chrome.runtime.sendMessage({type: 'clear-local-storage'});
+            // chrome.storage.local.clear(() => {
+            //     isAddingToGroup.value = false;
+            //     chrome.runtime.sendMessage({type: 'clear-tabs'});
+            //     console.log('The storage has been cleared');
+            // });
+        }
+
+        function resetToDefault() {
+            isAddingToGroup.value = false;
+            mediaCount.value = 0;
         }
 
         async function updateCount() {
@@ -76,12 +85,11 @@ export default {
         return {
             mediaGroup,
             mediaCount,
-            isAddingToGroup,
             isSending,
             mediaUrl,
             hashTags,
             notifications: notifications,
-            proxyClearLocalStorage
+            clearStorage
         };
     },
     components: { SendToTelegram, AddToGroup, MediaCount, NotificationMessage }
@@ -92,7 +100,7 @@ export default {
     <div class="aaf-ui-wrapper">
         <MediaCount v-if="mediaCount > 0">{{ mediaCount }}</MediaCount>
         <br>
-        <button @click="proxyClearLocalStorage">clear storage</button>
+        <button @click="clearStorage">clear storage</button>
         <br>
         <SendToTelegram :media-group="mediaGroup" :media-url="mediaUrl" :hash-tags="hashTags"></SendToTelegram>
         <br>

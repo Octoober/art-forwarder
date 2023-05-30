@@ -1,6 +1,8 @@
 <script>
 import { inject } from 'vue';
-import { ERROR_LEVELS } from '../../constants';
+import { ERROR_LEVELS, MEDIA_TYPES } from '../../constants';
+import { Notification } from '../../models/Notification';
+import { MediaItem } from '../../models/MediaItem';
 
 export default {
     props: {
@@ -10,20 +12,22 @@ export default {
     },
     setup(props) {
         const isAddingToGroup = inject('isAddingToGroup');
+        const notifications = inject('notifications');
 
         async function updateGroupMedia() {
             try {
-                const mediaItem = {
-                    type: 'photo',
-                    mediaUrl: props.mediaUrl,
-                    caption: props.hashTags.join(' ')
-                };
+                const mediaItem = new MediaItem(MEDIA_TYPES.PHOTO, props.mediaUrl, props.hashTags.join(' '), '');
+                const response = await chrome.runtime.sendMessage({ type: 'update-group', data: { mediaItem } });
 
-                const response = await chrome.runtime.sendMessage({ type: 'update-group', data: { mediaItem } })
+                if (response.level === ERROR_LEVELS.SUCCESS) {
+                    isAddingToGroup.value = !isAddingToGroup.value;
+                } else {
+                    notifications.value.push(response);
+                }
 
-                if (response.level === ERROR_LEVELS.SUCCESS) isAddingToGroup.value = !isAddingToGroup.value;
             } catch (error) {
-                console.log(error)
+                console.error(error);
+                notifications.value.push(new Notification(ERROR_LEVELS.ERROR, error));
             }
         }
         return {

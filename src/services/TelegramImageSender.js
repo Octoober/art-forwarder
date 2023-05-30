@@ -1,5 +1,6 @@
 import { TELEGRAM_API_URL, ERROR_LEVELS } from '../constants';
-import { removeDuplicateTags } from './helpers';
+import { Notification } from '../models/Notification';
+import { removeDuplicateTags } from '../utils/helpers';
 /**
  * A collection of image URLs and associated tags.
  *
@@ -15,7 +16,7 @@ export class TelegramImageSender {
 
         const mediaData = mediaGroup.map((item, index) => ({
             type: item.type,
-            media: item.mediaUrl,
+            media: item.url,
             caption: index === 0 ? uniqueTags : ''
         }));
 
@@ -31,15 +32,12 @@ export class TelegramImageSender {
      * Send an array media to the Telegram channel/chat.
      *
      * @param {postCollection} collection
-     * @returns {Promise<string>}
+     * @returns {Promise<Notification>}
      * @throws {Error} If request error.
      */
     async sendMedia(mediaGroup) {
         const { botToken, chatId } = await chrome.storage.sync.get(['botToken', 'chatId']);
-
         const requestBody = this._createRequestBody(chatId, mediaGroup);
-
-        // return { level: ERROR_LEVELS.WARNING, message: 'Success a send the media group. ' + new Date().getTime() };
 
         return fetch(TELEGRAM_API_URL + botToken + '/sendMediaGroup', {
             method: 'POST',
@@ -47,18 +45,16 @@ export class TelegramImageSender {
                 'Content-Type': 'application/json'
             },
             body: requestBody
-        })
-            .then(response => {
-                if (response.ok) {
-                    return { level: ERROR_LEVELS.SUCCESS, message: 'Success a send the media group.' };
-                } else {
-                    console.error(response);
-                    return { level: ERROR_LEVELS.ERROR, message: 'Error send a media group.' };
-                }
-            })
-            .catch(error => {
-                console.error(error);
-                return { level: ERROR_LEVELS.ERROR, message: `Request error: ${error}` };
-            });
+        }).then(response => {
+            if (response.ok) {
+                return new Notification(ERROR_LEVELS.SUCCESS, 'Media successfully sent to Telegram.');
+            } else {
+                console.error(response);
+                return new Notification(ERROR_LEVELS.ERROR, 'Error sending the media to Telegram.');
+            }
+        }).catch(error => {
+            console.error(error);
+            return new Notification(ERROR_LEVELS.ERROR, error);
+        });
     }
 }
