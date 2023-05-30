@@ -4,7 +4,7 @@ This Chrome browser extension simplifies the process of sharing anime art to a T
 
 <br>
 <div align="center">
-    <img width="500" align="center" src="./assets/example.gif?v=01">
+    <img width="500" align="center" src="./assets/example.v1.0.2.gif">
     <br><br>
     <a href="https://github.com/Octoober/anime-art-forwarder/releases/latest" target="_blank">
         <img alt="GitHub all releases" src="https://img.shields.io/github/downloads/octoober/anime-art-forwarder/total?label=download (latest)&color=blue&logo=google&logoColor=white&style=for-the-badge">
