@@ -19,16 +19,9 @@ export default {
                     caption: props.hashTags.join(' ')
                 };
 
-                const updatedGroup = isAddingToGroup.value
-                    ? await props.mediaGroup.removeMedia(props.mediaUrl)
-                    : await props.mediaGroup.addMedia(mediaItem);
+                const response = await chrome.runtime.sendMessage({ type: 'update-group', data: { mediaItem } })
 
-                const count = (await props.mediaGroup.getMediaGroup()).length
-
-                if (updatedGroup.level === ERROR_LEVELS.SUCCESS) {
-                    isAddingToGroup.value = !isAddingToGroup.value;
-                    chrome.runtime.sendMessage({type: 'update-group', data: {count}});
-                }
+                if (response.level === ERROR_LEVELS.SUCCESS) isAddingToGroup.value = !isAddingToGroup.value;
             } catch (error) {
                 console.log(error)
             }

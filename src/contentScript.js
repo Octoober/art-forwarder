@@ -12,10 +12,4 @@ function createWrapper() {
 window.onload = () => {
     createWrapper()
     createApp(AppContent).mount('#AAF')
-
-    const wrapperElement = document.querySelector('#AAF');
 }
-
-console.log(
-    chrome.action?.setBadgeText
-);

@@ -35,52 +35,53 @@ export default {
             isAddingToGroup.value = !!isExists;
         }
 
-        function clearLocalStorage(message) {
-            console.log(message);
-            if (message.data.level === ERROR_LEVELS.SUCCESS) {
-                chrome.storage.local.clear(() => {
-                    isAddingToGroup.value = false;
-                    console.log('The storage has been cleared');
-                });
-            }
-        }
-
-        async function updateCount(message) {
-            mediaCount.value = (await mediaGroup.getMediaGroup()).length;
-        }
-
-        function updateTabs(callback) {
+        function initEvents() {
             chrome.runtime.onMessage.addListener((message, sender, sendRequest) => {
-                if (message.type !== 'update-tabs') return;
-                callback(message);
+                if (message.type === 'clear-local-storage') {
+                    chrome.storage.local.clear(() => {
+                        isAddingToGroup.value = false;
+                        console.log('The storage has been cleared');
+                    });
+                }
+
+                if (message.type === 'update-count') {
+                    mediaCount.value = message.data.count;
+                }
             });
         }
 
-        const showNoti = () => {
-            console.log(notifications.value);
+        function proxyClearLocalStorage() {
+            chrome.storage.local.clear(() => {
+                isAddingToGroup.value = false;
+                console.log('The storage has been cleared');
+            });
+        }
+
+        async function updateCount() {
+            mediaCount.value = (await mediaGroup.getMediaGroup()).length;
         }
 
         onMounted(async () => {
             await isMediaExists();
             updateCount();
-            updateTabs(clearLocalStorage)
-            updateTabs(updateCount)
+            initEvents();
 
             const mediaElement = document.querySelector(SELECTORS.image);
             const uiWrapperElement = document.querySelector('.aaf-ui-wrapper');
+
             positionRelativeToTarget(uiWrapperElement, mediaElement);
             if (mediaElement) document.querySelector('#AAF').style.display = 'block';
         });
 
         return {
-            showNoti,
             mediaGroup,
             mediaCount,
             isAddingToGroup,
             isSending,
             mediaUrl,
             hashTags,
-            notifications: notifications
+            notifications: notifications,
+            proxyClearLocalStorage
         };
     },
     components: { SendToTelegram, AddToGroup, MediaCount, NotificationMessage }
@@ -90,6 +91,8 @@ export default {
 <template>
     <div class="aaf-ui-wrapper">
         <MediaCount v-if="mediaCount > 0">{{ mediaCount }}</MediaCount>
+        <br>
+        <button @click="proxyClearLocalStorage">clear storage</button>
         <br>
         <SendToTelegram :media-group="mediaGroup" :media-url="mediaUrl" :hash-tags="hashTags"></SendToTelegram>
         <br>
