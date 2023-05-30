@@ -37,13 +37,6 @@ export default {
 
         function initEvents() {
             chrome.runtime.onMessage.addListener((message, sender, sendRequest) => {
-                // if (message.type === 'clear-local-storage') {
-                //     chrome.storage.local.clear(() => {
-                //         isAddingToGroup.value = false;
-                //         console.log('The storage has been cleared');
-                //     });
-                // }
-
                 if (message.type === 'update-count') {
                     mediaCount.value = message.data.count;
                 }
@@ -53,12 +46,7 @@ export default {
         }
 
         function clearStorage() {
-            chrome.runtime.sendMessage({type: 'clear-local-storage'});
-            // chrome.storage.local.clear(() => {
-            //     isAddingToGroup.value = false;
-            //     chrome.runtime.sendMessage({type: 'clear-tabs'});
-            //     console.log('The storage has been cleared');
-            // });
+            chrome.runtime.sendMessage({ type: 'clear-local-storage' });
         }
 
         function resetToDefault() {
@@ -72,7 +60,7 @@ export default {
 
         onMounted(async () => {
             await isMediaExists();
-            updateCount();
+            await updateCount();
             initEvents();
 
             const mediaElement = document.querySelector(SELECTORS.image);
@@ -80,6 +68,10 @@ export default {
 
             positionRelativeToTarget(uiWrapperElement, mediaElement);
             if (mediaElement) document.querySelector('#AAF').style.display = 'block';
+
+            window.addEventListener('resize', () => {
+                positionRelativeToTarget(uiWrapperElement, mediaElement);
+            });
         });
 
         return {
@@ -97,8 +89,17 @@ export default {
 </script>
 
 <template>
+    <!--
+        -----------------------------------------------
+
+                 I will definitely become beautiful...
+                /
+            ಥ_ಥ
+
+        -------------------------------------------------
+    -->
     <div class="aaf-ui-wrapper">
-        <MediaCount v-if="mediaCount > 0">{{ mediaCount }}</MediaCount>
+        <MediaCount>{{ mediaCount }}</MediaCount>
         <br>
         <button @click="clearStorage">clear storage</button>
         <br>
@@ -112,21 +113,25 @@ export default {
 <style lang="scss">
 .aaf-ui-wrapper {
     position: absolute;
+    width: 120px;
     padding: 0 5px 7px 5px;
-    user-select: none;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    opacity: .8;
-    transition-delay: .5s;
-    z-index: 10000;
     background-color: rgba($color: #000000, $alpha: .5);
+
+    user-select: none;
+    transition-delay: .5s;
     transform: scale(0.9);
+    opacity: .8;
+    z-index: 10000;
 
     &:hover {
         opacity: 1;
         transition-delay: 0s;
     }
+}
+</style>
+
+<style lang="scss" scoped>
+button {
+    width: 100%;
 }
 </style>

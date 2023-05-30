@@ -43,7 +43,7 @@ export default {
 
 <template>
     <button @click.async="sendImageToTelegram" :disabled="isSending">
-        <div v-if="mediaCount > 0">Send group to telegram</div>
+        <div v-if="mediaCount > 0">Send group to Telegram</div>
         <div v-else>Send this</div>
     </button>
 </template>
