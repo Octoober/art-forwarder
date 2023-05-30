@@ -2,6 +2,9 @@
 // Enabling and disabling tags.
 export const TAGS = true;
 
+// Limit media items
+export const MAX_ITEMS = 10;
+
 // An object containing CSS selectors.
 export const SELECTORS = {
     image: [

@@ -1,15 +1,11 @@
 import { TELEGRAM_API_URL, ERROR_LEVELS } from '../constants';
 import { Notification } from '../models/Notification';
 import { removeDuplicateTags } from '../utils/helpers';
-/**
- * A collection of image URLs and associated tags.
- *
- * @typedef {Object} postCollection
- * @property {string} imageUrl - The URL of the image.
- * @property {string} tag - An associated tag for the image.
- */
 
-/** A class for sending of images to a Telegram channel or chat. */
+
+/**
+ * A class for sending of media to a Telegram channel or chat.
+ */
 export class TelegramImageSender {
     _createRequestBody(chatId, mediaGroup) {
         const uniqueTags = removeDuplicateTags(mediaGroup).join(' ');
@@ -31,9 +27,9 @@ export class TelegramImageSender {
     /**
      * Send an array media to the Telegram channel/chat.
      *
-     * @param {postCollection} collection
+     * @async
+     * @param {MediaItem[]} mediaGroup
      * @returns {Promise<Notification>}
-     * @throws {Error} If request error.
      */
     async sendMedia(mediaGroup) {
         const { botToken, chatId } = await chrome.storage.sync.get(['botToken', 'chatId']);
