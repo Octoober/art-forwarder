@@ -1,9 +1,10 @@
+
 /**
-* Функция принимает текстовую строку и возвращает хэш-тег, подходящий для публикации в телеграм.
-* Пример: This is a test (string) => #this_is_a_test_string
+* Converts a given string to a hashtag.
 *
-* @param {string} text - Строка для преобразования.
-* @return {string} - Готовый хэш-тег
+* @param {string} text - The input string.
+
+* @returns {string} - The hashtag string.
 */
 export function toHashtag(text) {
     return '#' + text.replace(/[\(].*?[\)]/g, '')
@@ -12,11 +13,11 @@ export function toHashtag(text) {
 }
 
 /**
- * Парсит теги и преобраует их в подходящие для телеграма хэштеги.
- * Подходит для: rule34.xxx и danbooru.donmai.us
+ * Get hashtags from selectors.
  *
- * @param {string[]} selectors - Массив CSS-селектров, которые необходимо найти на странице.
- * @returns {string[]} - Массив хэштегов.
+ * @param {string[]} selectors - Array CSS selectors.
+ *
+ * @returns {string[]} - The object of hashtags.
  */
 export function getHashtags(selectors) {
     const hashtags = [];
@@ -28,10 +29,9 @@ export function getHashtags(selectors) {
         if (elements.length === 0) return;
 
         Array.from(elements).forEach(element => {
-            const hashtagElement = element.querySelector('a:nth-child(2)'); // Только вторую ссылку
+            const hashtagElement = element.querySelector('a:nth-child(2)');
             if (!hashtagElement) return;
 
-            // Преобразует теги в формат, который поддерживает телеграм, добавляет префик "#"
             const hashtagText = toHashtag(hashtagElement.innerText);
             if (hashtagText) {
                 hashtags.push(hashtagText);
@@ -43,56 +43,23 @@ export function getHashtags(selectors) {
 }
 
 /**
- * Ищет изображение на стринице по заданным CSS-селектрам и получает его URL.
+ * Get media url by selector.
  *
- * @param {string[]} selectors - Массив с CSS-селектрами.
- * @returns {?string} - URL изображения или null, если изображение не найдено.
- */
-export function getImageUrlBySelector(selectors) {
-    const imageElement = document.querySelector(selectors.join(','));
-    return imageElement ? imageElement.src : null;
-}
-
-/**
- * ! DEPRECATED FUNCTION
- * Группирует отдельные посты в локальном хранилище для дальнейшей публикации их единой группой.
+ * @param {string[]} selectors - An array of selectors.
  *
- * @param {string} pageUrl - Ссылка на страницу.
- * @param {string} type - Тип медиа контента (photo, video).
- * @param {string} media - Строка c URL на медиа, которые следует опубликовать.
- * @param {string} caption - Описание, которое будет отображаться у опубликованных постов.
+ * @returns {string|null} - The srcof the media element or null if not found.
  */
-export async function saveToCollection(pageUrl, type, media, caption) {
-    try {
-        const { postCollection } = await chrome.storage.local.get('postCollection') || {};
-
-        // Выполняется если postCollection существует, а так же имеет в себе такой же pageUrl
-        if (postCollection && postCollection.some(post => post.pageUrl === pageUrl)) {
-            throw new Error('This pageUrl already in the collection');
-        }
-
-        // Если postCollection существует - перезаписываем его в новую переменную,
-        // в противном случае записываем пустую переменную
-        const newPostCollection = postCollection ? [...postCollection] : [];
-
-        // Добавляет новые значения в коллекцию
-        newPostCollection.push({ pageUrl, type, media, caption });
-
-        // Обнавляет коллекцию в хранилище
-        await chrome.storage.local.set({ postCollection: newPostCollection }, () => {
-            console.log('Successfully added to the collection');
-        });
-    } catch (error) {
-        console.error(error)
-        throw new Error('Unable to save photo to collection! Please try again later.');
-    }
+export function getMediaUrlBySelector(selectors) {
+    const element = document.querySelector(selectors.join(','));
+    return element ? element.src : null;
 }
 
 /**
  * Removes duplicate tags from a media group.
  *
- * @param {Array} mediaGroup - An array of media items.
- * @returns {Array} An array of unique tags.
+ * @param {MediaItem[]} mediaGroup - An array of media items.
+ *
+ * @returns {string[]} An array of unique tags.
  */
 export function removeDuplicateTags(mediaGroup) {
     const allTags = mediaGroup.flatMap(item => item.caption.split(' '));
@@ -102,10 +69,10 @@ export function removeDuplicateTags(mediaGroup) {
 }
 
 /**
- * Adjusts the position of `parentElement` relative to `targetElement`.
+ * Adjusts the position of "parentElement" relative to "targetElement".
  *
  * @param {Element} parentElement - The element that needs to be repositioned.
- * @param {Element} targetElement - The element relative to which the `parentElement` is positioned.
+ * @param {Element} targetElement - The element relative to which the "parentElement" is positioned.
  *
  * @returns {void}
  */

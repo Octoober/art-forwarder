@@ -20,9 +20,6 @@ export const SELECTORS = {
             'li.tag-type-character.tag', // rule34.xxx
             'li.tag-type-4' // danbooru.donmai.us
         ],
-        // meta: [
-        //     'ul.meta-tag-list > li.tag-type-5' // danbooru.donmai.us
-        // ]
     }
 };
 

@@ -4,14 +4,16 @@ import { removeDuplicateTags } from '../utils/helpers';
 
 
 /**
- * A class for sending of media to a Telegram channel or chat.
+ * A class for sending of media to the Telegram channel or chat.
  */
 export class TelegramMediaSender {
     /**
+     *  Create a request body for sending media to the Telegram.
      *
-     * @param {string} chatId
-     * @param {MediaItem[]} mediaGroup
-     * @returns
+     * @param {string} chatId - The ID of the chat to send the media to.
+     * @param {MediaItem[]} mediaGroup - An array MediaItems to be sent.
+     *
+     * @returns {string} - A JSON stringify of the request body.
      */
     _createRequestBody(chatId, mediaGroup) {
         const uniqueTags = removeDuplicateTags(mediaGroup).join(' ');
@@ -31,11 +33,12 @@ export class TelegramMediaSender {
     }
 
     /**
-     * Send an array media to the Telegram channel/chat.
+     * Send an array media to the Telegram channel or chat.
      *
      * @async
-     * @param {MediaItem[]} mediaGroup
-     * @returns {Promise<Notification>}
+     * @param {MediaItem[]} mediaGroup - An array MediaItems to be sent.
+     *
+     * @returns {Promise<Notification>} - A promis that resolves with a Notification object.
      */
     async sendMedia(mediaGroup) {
         const { botToken, chatId } = await chrome.storage.sync.get(['botToken', 'chatId']);
