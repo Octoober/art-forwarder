@@ -1,9 +1,9 @@
-import { TelegramImageSender } from './services/TelegramImageSender';
+import { TelegramMediaSender } from './services/TelegramMediaSender';
 import { MediaGroup } from "./services/MediaGroup";
 import { ERROR_LEVELS } from './constants';
 import { Notification } from './models/Notification';
 
-const telegramSender = new TelegramImageSender();
+const telegramSender = new TelegramMediaSender();
 const mediaGroup = new MediaGroup();
 
 const parentMenuItem = chrome.contextMenus.create({

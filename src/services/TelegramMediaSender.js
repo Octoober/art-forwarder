@@ -6,7 +6,13 @@ import { removeDuplicateTags } from '../utils/helpers';
 /**
  * A class for sending of media to a Telegram channel or chat.
  */
-export class TelegramImageSender {
+export class TelegramMediaSender {
+    /**
+     *
+     * @param {string} chatId
+     * @param {MediaItem[]} mediaGroup
+     * @returns
+     */
     _createRequestBody(chatId, mediaGroup) {
         const uniqueTags = removeDuplicateTags(mediaGroup).join(' ');
 
