@@ -32,7 +32,7 @@ export function getHashtags(selectors) {
             const hashtagElement = element.querySelector('a:nth-child(2)');
             if (!hashtagElement) return;
 
-            const hashtagText = toHashtag(hashtagElement.innerText);
+            const hashtagText = toHashtag(hashtagElement.textContent);
             if (hashtagText) {
                 hashtags.push(hashtagText);
             }
