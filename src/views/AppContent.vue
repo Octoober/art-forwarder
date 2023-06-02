@@ -1,7 +1,7 @@
 <script>
 import { ref, reactive, provide, onMounted } from 'vue';
 import { ERROR_LEVELS, SELECTORS } from '../constants';
-import { getImageUrlBySelector, getHashtags, positionRelativeToTarget } from '../utils/helpers';
+import { getMediaUrlBySelector, getHashtags, positionRelativeToTarget } from '../utils/helpers';
 import { MediaGroup } from '../services/MediaGroup';
 
 import SendToTelegram from './components/SendToTelegram.vue';
@@ -13,7 +13,7 @@ import NotificationMessage from './components/NotificationMessage.vue';
 export default {
     setup() {
         const mediaGroup = new MediaGroup();
-        const mediaUrl = getImageUrlBySelector(SELECTORS.image);
+        const mediaUrl = getMediaUrlBySelector(SELECTORS.image);
         const hashTags = getHashtags(SELECTORS.tags);
 
         // Indication adding to group
