@@ -22,9 +22,9 @@ export function toHashtag(text) {
 export function getHashtags(selectors) {
     const hashtags = [];
 
-    const tegs = Object.values(selectors).flat();
+    const selectorsFlat = Object.values(selectors).flat();
 
-    tegs.forEach(selector => {
+    selectorsFlat.forEach(selector => {
         const elements = document.querySelectorAll(selector);
         if (elements.length === 0) return;
 
