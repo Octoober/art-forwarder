@@ -18,7 +18,8 @@ export default {
             try {
                 isSending.value = true;
                 let group = await props.mediaGroup.getMediaGroup();
-                const mediaItem = new MediaItem(MEDIA_TYPES.PHOTO, props.mediaUrl, props.hashTags.join(' '), '');
+
+                const mediaItem = new MediaItem(MEDIA_TYPES.PHOTO, props.mediaUrl, 'test caption', props.hashTags);
 
                 group = group.length !== 0 ? group : [mediaItem];
 

@@ -1,6 +1,6 @@
 import { TELEGRAM_API_URL, ERROR_LEVELS } from '../constants';
 import { Notification } from '../models/Notification';
-import { removeDuplicateTags } from '../utils/helpers';
+import { convertTagsToMarkdown, exstractHashtags, removeDuplicateTags } from '../utils/helpers';
 
 
 /**
@@ -16,18 +16,17 @@ export class TelegramMediaSender {
      * @returns {string} - A JSON stringify of the request body.
      */
     _createRequestBody(chatId, mediaGroup) {
-        const uniqueTags = removeDuplicateTags(mediaGroup).join(' ');
-
+        const uniqueHashtagsMarkdown = convertTagsToMarkdown(exstractHashtags(mediaGroup));
         const mediaData = mediaGroup.map((item, index) => ({
             type: item.type,
             media: item.url,
-            caption: index === 0 ? uniqueTags : ''
+            caption: index === 0 ? uniqueHashtagsMarkdown : '',
+            parse_mode: 'html',
         }));
 
         return JSON.stringify({
             chat_id: chatId,
             media: mediaData,
-            parse_mode: 'Markdown',
             schedule_date: Date.now() + 86400000
         });
     }

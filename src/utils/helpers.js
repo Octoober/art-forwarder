@@ -15,31 +15,32 @@ export function toHashtag(text) {
 /**
  * Get hashtags from selectors.
  *
- * @param {string[]} selectors - Array CSS selectors.
+ * @param {Object[]} selectorGroup - Array CSS selectors.
  *
- * @returns {string[]} - The object of hashtags.
+ * @returns {Object[]} - The object of hashtags group.
  */
-export function getHashtags(selectors) {
-    const hashtags = [];
+export function getHashtags(selectorGroup) {
+    let hashtagGroup = []
 
-    const selectorsFlat = Object.values(selectors).flat();
+    for (const { selectors, title } of selectorGroup) {
+        const elements = document.querySelectorAll(selectors.join(','));
 
-    selectorsFlat.forEach(selector => {
-        const elements = document.querySelectorAll(selector);
-        if (elements.length === 0) return;
+        if (!elements.length) continue;
 
-        Array.from(elements).forEach(element => {
+        const tags = Array.from(elements, element => {
             const hashtagElement = element.querySelector('a:nth-child(2)');
             if (!hashtagElement) return;
 
-            const hashtagText = toHashtag(hashtagElement.textContent);
-            if (hashtagText) {
-                hashtags.push(hashtagText);
-            }
+            return toHashtag(hashtagElement.textContent);
         });
-    });
 
-    return hashtags;
+        hashtagGroup.push({
+            title,
+            tags
+        });
+    };
+
+    return hashtagGroup;
 }
 
 /**
@@ -52,20 +53,6 @@ export function getHashtags(selectors) {
 export function getMediaUrlBySelector(selectors) {
     const element = document.querySelector(selectors.join(','));
     return element ? element.src : null;
-}
-
-/**
- * Removes duplicate tags from a media group.
- *
- * @param {MediaItem[]} mediaGroup - An array of media items.
- *
- * @returns {string[]} An array of unique tags.
- */
-export function removeDuplicateTags(mediaGroup) {
-    const allTags = mediaGroup.flatMap(item => item.caption.split(' '));
-    const uniqueTags = [...new Set(allTags)];
-
-    return uniqueTags;
 }
 
 /**
@@ -88,4 +75,46 @@ export function positionRelativeToTarget(parentElement, targetElement) {
     parentElement.style.top = targetRect.top + 10 + scrollY + 'px';
 
     parentElement.style.display = 'block';
+}
+
+/**
+ * Convert a tag group to markdown format.
+ *
+ * @param {Object[]} tagGroup - An array of object with title and tags properties.
+ *
+ * @returns {string} The converted markdown.
+ */
+export function convertTagsToMarkdown(tagGroup) {
+    let text = '';
+
+    for (const {title, tags} of tagGroup) {
+        text += `<i>${title}:</i> ${tags.join(' ')}\n`;
+    }
+
+    return text;
+}
+
+/**
+ * Extract the hashtags from a mediaGroup.
+ *
+ * @param {Array} mediaGroup - The mediaGroup object.
+ *
+ * @returns {Array<Object>} An array of object containing the totle and tags.
+ */
+export function exstractHashtags(mediaGroup) {
+    const hashtags = {};
+
+    mediaGroup.forEach(item => {
+        item.hashtags.forEach(hashtagGroup => {
+            const { title, tags } = hashtagGroup;
+            if (!hashtags[title]) hashtags[title] = new Set();
+
+            tags.map(tag => hashtags[title].add(tag));
+        });
+    });
+
+    return Object.entries(hashtags).map(([title, tags]) => ({
+        title,
+        tags: [...tags]
+    }));
 }

@@ -16,7 +16,7 @@ export default {
 
         async function updateGroupMedia() {
             try {
-                const mediaItem = new MediaItem(MEDIA_TYPES.PHOTO, props.mediaUrl, props.hashTags.join(' '), '');
+                const mediaItem = new MediaItem(MEDIA_TYPES.PHOTO, props.mediaUrl, 'test caption', props.hashTags);
                 const response = await chrome.runtime.sendMessage({ type: 'update-group', data: { mediaItem } });
 
                 if (response.level === ERROR_LEVELS.SUCCESS) {
