@@ -1,3 +1,5 @@
+// TODO: Code refactoring is needed
+
 import { TelegramMediaSender } from './services/TelegramMediaSender';
 import { MediaGroup } from "./services/MediaGroup";
 import { ERROR_LEVELS } from './constants';
@@ -23,8 +25,6 @@ chrome.contextMenus.create({
     contexts: ["image"],
 });
 
-
-// TODO: Code refactoring is needed
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'send-media') {
         try {
@@ -88,7 +88,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 chrome.runtime.onInstalled.addListener(() => {
     mediaGroup.getMediaGroup()
         .then(response => response.length)
-        .then(count => updateCount(count))
+        .then(count => {
+            chrome.action.setBadgeText({
+                text: count !== undefined && count > 0 ? count.toString() : ''
+            });
+        })
         .catch(error => console.error);
 });
 
@@ -97,7 +101,7 @@ function updateCount(count) {
         text: count !== undefined && count > 0 ? count.toString() : ''
     });
 
-    chrome.tabs.query({}, tabs => {
+    chrome.tabs.query({active: true, currentWindow: true}, tabs => {
         for (const tab of tabs) {
             chrome.tabs.sendMessage(tab.id, { type: 'update-count', data: { count } });
         }
