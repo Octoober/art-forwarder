@@ -1,6 +1,1 @@
 __tests__/html/*.html linguist-vendored
-
-*.sass linguist-vendored
-*.scss linguist-vendored
-*.css linguist-vendored
-*.less linguist-vendored
