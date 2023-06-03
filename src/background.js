@@ -30,7 +30,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         try {
             // POST request to telegram
             telegramSender.sendMedia(message.data).then(response => {
-                console.log(response);
                 // Send response from telegram api
                 sendResponse(response)
 

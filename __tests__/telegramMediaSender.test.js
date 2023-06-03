@@ -6,19 +6,18 @@ const mockChromeStorageData = {
 }
 
 const mockMediaGroup = [
-    { type: 'photo', url: 'https://example.com/medianame.jpg', caption: '' },
-    { type: 'photo', url: 'https://example.com/medianame.jpg', caption: '' },
-    { type: 'photo', url: 'https://example.com/medianame.jpg', caption: '' },
+    { type: 'photo', url: 'https://example.com/medianame.jpg', caption: '', hashtags: [] },
+    { type: 'photo', url: 'https://example.com/medianame.jpg', caption: '', hashtags: [{ title: '', tags: [] }] },
+    { type: 'photo', url: 'https://example.com/medianame.jpg', caption: '', hashtags: [] },
 ];
 
 const mockRequestBody = {
     chat_id: mockChromeStorageData.chatId,
     media: [
-        { type: 'photo', media: 'https://example.com/medianame.jpg', caption: '' },
-        { type: 'photo', media: 'https://example.com/medianame.jpg', caption: '' },
-        { type: 'photo', media: 'https://example.com/medianame.jpg', caption: '' },
+        { type: 'photo', media: 'https://example.com/medianame.jpg', caption: '', parse_mode: 'html' },
+        { type: 'photo', media: 'https://example.com/medianame.jpg', caption: '', parse_mode: 'html' },
+        { type: 'photo', media: 'https://example.com/medianame.jpg', caption: '', parse_mode: 'html' },
     ],
-    parse_mode: 'Markdown',
     schedule_date: expect.any(Number)
 }
 
@@ -35,7 +34,7 @@ describe('TelegramImageSender', () => {
             }
         };
 
-        jest.spyOn(console, 'error').mockImplementation(() => {});
+        // jest.spyOn(console, 'error').mockImplementation(() => { });
 
         mockFetch = jest.spyOn(global, 'fetch');
 
@@ -55,10 +54,14 @@ describe('TelegramImageSender', () => {
 
         it('should include unique tags in the caption', () => {
             const mediaGroup = [
-                { type: 'photo', url: 'https://example.com/medianame.jpg', caption: '#tag1 #tag2' },
-                { type: 'photo', url: 'https://example.com/medianame.jpg', caption: '#tag2 #tag3' },
+                {
+                    type: 'photo', url: 'https://example.com/medianame.jpg', caption: '', hashtags: [
+                        { title: 'first title', tags: ['#test_tag1', '#test_tag2', '#test_tag1'] },
+                        { title: 'last title', tags: ['#test_tag1', '#test_tag2', '#test_tag2'] },
+                    ]
+                },
             ];
-            const expectedCaption = '#tag1 #tag2 #tag3';
+            const expectedCaption = '<i>first title:</i> #test_tag1 #test_tag2\n<i>last title:</i> #test_tag1 #test_tag2\n';
             const reqestBody = telegramMediaSender._createRequestBody(mockChromeStorageData.chatId, mediaGroup);
 
             expect(JSON.parse(reqestBody).media[0].caption).toEqual(expectedCaption);
@@ -107,7 +110,7 @@ describe('TelegramImageSender', () => {
 
             const result = await telegramMediaSender.sendMedia(mockMediaGroup);
 
-            expect(result).toEqual({level: 'error', message: expect.any(String)});
+            expect(result).toEqual({ level: 'error', message: expect.any(String) });
         });
     });
 });

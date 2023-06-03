@@ -29,14 +29,14 @@ export function getHashtags(selectorGroup) {
 
         const tags = Array.from(elements, element => {
             const hashtagElement = element.querySelector('a:nth-child(2)');
-            if (!hashtagElement) return;
+            if (!hashtagElement) return [];
 
             return toHashtag(hashtagElement.textContent);
         });
 
         hashtagGroup.push({
-            title,
-            tags
+            title: title.length ? title : '',
+            tags: tags ? tags : []
         });
     };
 
@@ -88,7 +88,7 @@ export function convertTagsToMarkdown(tagGroup) {
     let text = '';
 
     for (const {title, tags} of tagGroup) {
-        text += `<i>${title}:</i> ${tags.join(' ')}\n`;
+        text += title.length | tags.length ? `<i>${title}:</i> ${tags.join(' ')}\n` : '';
     }
 
     return text;
@@ -105,8 +105,9 @@ export function exstractHashtags(mediaGroup) {
     const hashtags = {};
 
     mediaGroup.forEach(item => {
-        item.hashtags.forEach(hashtagGroup => {
-            const { title, tags } = hashtagGroup;
+        if (!item.hashtags) return hashtags;
+
+        item.hashtags.forEach(({ title, tags }) => {
             if (!hashtags[title]) hashtags[title] = new Set();
 
             tags.map(tag => hashtags[title].add(tag));

@@ -4,6 +4,7 @@ import { JSDOM } from 'jsdom';
 import { getHashtags } from "../src/utils/helpers";
 import { SELECTORS } from '../src/constants';
 
+
 const htmlFiles = [
     'danbooru.donmai.us.html',
     'rule34.xxx.html',
@@ -13,13 +14,22 @@ describe('getHashtags()', () => {
     it.each(htmlFiles)('should return an array of hashtags for %s ', filename => {
         const html = fs.readFileSync(path.join(__dirname, `/html/${filename}`), 'utf-8');
         const { document } = new JSDOM(html).window;
+        const expectedArray = [
+            {
+                title: expect.any(String),
+                tags: expect.arrayContaining([expect.stringMatching(/^#/)])
+            },
+            {
+                title: expect.any(String),
+                tags: expect.arrayContaining([expect.stringMatching(/^#/)])
+            },
+        ];
+
         global.document = document;
 
         const result = getHashtags(SELECTORS.tags);
 
-        expect(result).toMatchObject(
-            result.map(() => expect.stringMatching(/^#[\w]+$/))
-        );
+        expect(result).toEqual(expectedArray);
     });
 
     it('should return an empty array if no hashtags are found', () => {
@@ -36,6 +46,13 @@ describe('getHashtags()', () => {
 
         const result = getHashtags(SELECTORS.tags);
 
-        expect(result).toEqual([]);
+        expect(result).toEqual(
+            [
+                {
+                    title: expect.any(String),
+                    tags: expect.arrayContaining([expect.anything()])
+                }
+            ]
+        );
     });
 });
