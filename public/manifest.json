@@ -1,8 +1,10 @@
 {
     "manifest_version": 3,
-    "name": "Anime Art Forwarder (alpha)",
-    "version": "0.2.2",
+    "name": "Anime Art Forwarder",
+    "version": "0.3.0",
+    "version_name": "0.3.0 alpha",
     "description": "A simple and efficient Chrome browser extension that streamlines the process of sending anime art to your Telegram channel through a Telegram bot. Quickly forward anime art from various sources directly to your Telegram channel with just one click.",
+    "homepage_url": "https://github.com/Octoober/anime-art-forwarder",
     "icons": {
         "16": "icons/icon_16.png",
         "32": "icons/icon_32.png",
