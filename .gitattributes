@@ -1,4 +1,4 @@
-__tests__/*.html linguist-vendored
+__tests__/html/*.html linguist-vendored
 
 *.sass linguist-vendored
 *.scss linguist-vendored
