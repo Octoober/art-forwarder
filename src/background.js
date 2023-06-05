@@ -37,7 +37,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                     // Send event to all tabs for updating vars
                     chrome.storage.local.clear(() => {
                         updateCount(0);
-                        chrome.tabs.query({}, tabs => {
+                        chrome.tabs.query({active: true, currentWindow: true}, tabs => {
                             for (const tab of tabs) {
                                 chrome.tabs.sendMessage(tab.id, { type: 'reset-to-default' });
                             }
@@ -76,7 +76,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message && message.type === 'clear-local-storage') {
         chrome.storage.local.clear(() => {
             updateCount(0);
-            chrome.tabs.query({}, tabs => {
+            chrome.tabs.query({active: true, currentWindow: true}, tabs => {
                 for (const tab of tabs) {
                     chrome.tabs.sendMessage(tab.id, { type: 'reset-to-default' });
                 }
