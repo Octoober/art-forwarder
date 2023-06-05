@@ -4,12 +4,12 @@ const AdmZip = require('adm-zip');
 
 try {
   const { base } = parse(__dirname);
-  const { version } = JSON.parse(
+  const { version_name } = JSON.parse(
     readFileSync(resolve(__dirname, 'build', 'manifest.json'), 'utf8')
   );
 
   const outdir = 'release';
-  const filename = `${base}-v${version}.zip`;
+  const filename = `${base}-v${version_name}.zip`;
   const zip = new AdmZip();
   zip.addLocalFolder('build');
   if (!existsSync(outdir)) {
