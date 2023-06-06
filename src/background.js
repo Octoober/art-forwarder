@@ -76,7 +76,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message && message.type === 'clear-local-storage') {
         chrome.storage.local.clear(() => {
             updateCount(0);
-            chrome.tabs.query({active: true, currentWindow: true}, tabs => {
+            chrome.tabs.query({}, tabs => {
                 for (const tab of tabs) {
                     chrome.tabs.sendMessage(tab.id, { type: 'reset-to-default' });
                 }
@@ -101,7 +101,7 @@ function updateCount(count) {
         text: count !== undefined && count > 0 ? count.toString() : ''
     });
 
-    chrome.tabs.query({active: true, currentWindow: true}, tabs => {
+    chrome.tabs.query({}, tabs => {
         for (const tab of tabs) {
             chrome.tabs.sendMessage(tab.id, { type: 'update-count', data: { count } });
         }

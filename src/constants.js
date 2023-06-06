@@ -1,6 +1,10 @@
-
 // Enabling and disabling tags.
 export const TAGS = true;
+
+export const CAPTION = {
+    sourcePrefix: 'source',
+    sourceSeparator: ', ',
+}
 
 // Limit media items
 export const MAX_ITEMS = 10;

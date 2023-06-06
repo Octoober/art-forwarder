@@ -15,6 +15,7 @@ export default {
         const mediaGroup = new MediaGroup();
         const mediaUrl = getMediaUrlBySelector(SELECTORS.image);
         const hashTags = getHashtags(SELECTORS.tags);
+        const sourceUrl = window.location.href;
 
         // Indication adding to group
         const isAddingToGroup = ref(false);
@@ -75,6 +76,7 @@ export default {
         });
 
         return {
+            sourceUrl,
             mediaGroup,
             mediaCount,
             isSending,
@@ -103,9 +105,9 @@ export default {
         <br>
         <button @click="clearStorage">clear storage</button>
         <br>
-        <SendToTelegram :media-group="mediaGroup" :media-url="mediaUrl" :hash-tags="hashTags"></SendToTelegram>
+        <SendToTelegram :media-group="mediaGroup" :media-url="mediaUrl" :hash-tags="hashTags" :sourceUrl="sourceUrl"></SendToTelegram>
         <br>
-        <AddToGroup :media-group="mediaGroup" :media-url="mediaUrl" :hash-tags="hashTags"></AddToGroup>
+        <AddToGroup :media-group="mediaGroup" :media-url="mediaUrl" :hash-tags="hashTags" :sourceUrl="sourceUrl"></AddToGroup>
     </div>
     <notification-message :notifications="notifications"></notification-message>
 </template>

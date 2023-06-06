@@ -7,7 +7,8 @@ export default {
     props: {
         mediaUrl: String,
         hashTags: Array,
-        mediaGroup: Object
+        mediaGroup: Object,
+        sourceUrl: String,
     },
     setup(props) {
         const isSending = inject('isSending');
@@ -19,7 +20,7 @@ export default {
                 isSending.value = true;
                 let group = await props.mediaGroup.getMediaGroup();
 
-                const mediaItem = new MediaItem(MEDIA_TYPES.PHOTO, props.mediaUrl, 'test caption', props.hashTags);
+                const mediaItem = new MediaItem(MEDIA_TYPES.PHOTO, props.mediaUrl, 'test caption', props.hashTags, props.sourceUrl);
 
                 group = group.length !== 0 ? group : [mediaItem];
 
