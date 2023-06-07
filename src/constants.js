@@ -3,7 +3,7 @@ export const TAGS = true;
 
 export const CAPTION = {
     sourcePrefix: 'source',
-    sourceSeparator: ', ',
+    sourceSeparator: ' | ',
 }
 
 // Limit media items

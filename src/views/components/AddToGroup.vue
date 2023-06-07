@@ -12,7 +12,7 @@ export default {
         sourceUrl: String,
     },
     setup(props) {
-        const isAddingToGroup = inject('isAddingToGroup');
+        const state = inject('state');
         const notifications = inject('notifications');
 
         async function updateGroupMedia() {
@@ -21,7 +21,7 @@ export default {
                 const response = await chrome.runtime.sendMessage({ type: 'update-group', data: { mediaItem } });
 
                 if (response.level === ERROR_LEVELS.SUCCESS) {
-                    isAddingToGroup.value = !isAddingToGroup.value;
+                    state.isAddingToGroup = !state.isAddingToGroup;
                 } else {
                     notifications.value.push(response);
                 }
@@ -32,7 +32,7 @@ export default {
             }
         }
         return {
-            isAddingToGroup,
+            state,
             updateGroupMedia
         }
     }
@@ -41,7 +41,7 @@ export default {
 
 <template>
     <button @click="updateGroupMedia" class="aaf-button">
-        <div v-if="isAddingToGroup">remove</div>
+        <div v-if="state.isAddingToGroup">remove</div>
         <div v-else>add</div>
     </button>
 </template>

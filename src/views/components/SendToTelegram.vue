@@ -11,13 +11,12 @@ export default {
         sourceUrl: String,
     },
     setup(props) {
-        const isSending = inject('isSending');
-        const mediaCount = inject('mediaCount');
+        const state = inject('state');
         const notifications = inject('notifications');
 
         async function sendImageToTelegram() {
             try {
-                isSending.value = true;
+                state.isSending = true;
                 let group = await props.mediaGroup.getMediaGroup();
 
                 const mediaItem = new MediaItem(MEDIA_TYPES.PHOTO, props.mediaUrl, 'test caption', props.hashTags, props.sourceUrl);
@@ -26,7 +25,7 @@ export default {
 
                 chrome.runtime.sendMessage({ type: 'send-media', data: group }, response => {
                     notifications.value.push(response);
-                    isSending.value = false;
+                    state.isSending = false;
                 });
 
             } catch (error) {
@@ -35,8 +34,7 @@ export default {
         }
 
         return {
-            isSending,
-            mediaCount,
+            state,
             sendImageToTelegram
         }
     }
@@ -44,8 +42,8 @@ export default {
 </script>
 
 <template>
-    <button @click.async="sendImageToTelegram" :disabled="isSending">
-        <div v-if="mediaCount > 0">Send group to Telegram</div>
+    <button @click.async="sendImageToTelegram" :disabled="state.isSending">
+        <div v-if="state.mediaCount > 0">Send group to Telegram</div>
         <div v-else>Send this</div>
     </button>
 </template>
