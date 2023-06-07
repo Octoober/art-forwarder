@@ -8,25 +8,28 @@ import { Notification } from './models/Notification';
 const telegramSender = new TelegramMediaSender();
 const mediaGroup = new MediaGroup();
 
-const parentMenuItem = chrome.contextMenus.create({
-    id: "myContextMenuItem",
-    title: "Anime Art Forwarder",
-    contexts: ["image"],
-    documentUrlPatterns: [
-        "*://danbooru.donmai.us/posts/*",
-        "*://rule34.xxx/index.php?page=post&s=view&id=*"
-    ]
-});
+// const parentMenuItem = chrome.contextMenus.create({
+//     id: "myContextMenuItem",
+//     title: "Anime Art Forwarder",
+//     contexts: ["image"],
+//     documentUrlPatterns: [
+//         "*://danbooru.donmai.us/posts/*",
+//         "*://rule34.xxx/index.php?page=post&s=view&id=*"
+//     ]
+// });
 
-chrome.contextMenus.create({
-    id: "sendThisImage",
-    parentId: parentMenuItem,
-    title: "Send this image",
-    contexts: ["image"],
-});
+// chrome.contextMenus.create({
+//     id: "sendThisImage",
+//     parentId: parentMenuItem,
+//     title: "Send this image",
+//     contexts: ["image"],
+// });
+
+chrome.runtime.onInstalled.addListener(setMediaGroupCount);
+chrome.runtime.onStartup.addListener(setMediaGroupCount);
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.type === 'send-media') {
+    if (message?.type === 'send-media') {
         try {
             // POST request to telegram
             telegramSender.sendMedia(message.data).then(response => {
@@ -36,12 +39,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 if (response.level === ERROR_LEVELS.SUCCESS) {
                     // Send event to all tabs for updating vars
                     chrome.storage.local.clear(() => {
-                        updateCount(0);
-                        chrome.tabs.query({active: true, currentWindow: true}, tabs => {
-                            for (const tab of tabs) {
-                                chrome.tabs.sendMessage(tab.id, { type: 'reset-to-default' });
-                            }
-                        });
+                        if (!chrome.runtime.lastError) {
+                            sendMessageToAllTabs('reset-state');
+                            setBage(0);
+                        }
                     });
                 }
             });
@@ -52,8 +53,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return true
     }
 
-    if (message && message.type === 'update-group') {
-        const { mediaItem } = message.data
+    if (message?.type === 'update-group') {
+        const { mediaItem } = message.data;
+
         mediaGroup.getMediaGroup()
             .then(response => {
                 const mediaCount = response.length;
@@ -65,7 +67,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
                 operationPromise.then(result => {
                     const countDelta = isMediaExists ? -1 : 1;
-                    if (result.level === ERROR_LEVELS.SUCCESS) updateCount(mediaCount + countDelta);
+
+                    if (result.level === ERROR_LEVELS.SUCCESS) {
+                        sendMessageToAllTabs('update-content', { mediaCount: mediaCount + countDelta });
+                        setBage(mediaCount + countDelta);
+                    }
+
                     sendResponse(result);
                 });
             }).catch(console.error);
@@ -73,37 +80,41 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return true;
     }
 
-    if (message && message.type === 'clear-local-storage') {
+    if (message?.type === 'clear-local-storage') {
         chrome.storage.local.clear(() => {
-            updateCount(0);
-            chrome.tabs.query({active: true, currentWindow: true}, tabs => {
-                for (const tab of tabs) {
-                    chrome.tabs.sendMessage(tab.id, { type: 'reset-to-default' });
-                }
-            });
+            if (!chrome.runtime.lastError) {
+                sendMessageToAllTabs('reset-state');
+                setBage(0);
+            }
         });
     }
 });
 
-chrome.runtime.onInstalled.addListener(() => {
+function setMediaGroupCount() {
     mediaGroup.getMediaGroup()
         .then(response => response.length)
         .then(count => {
-            chrome.action.setBadgeText({
-                text: count !== undefined && count > 0 ? count.toString() : ''
-            });
+            setBage(count);
         })
-        .catch(error => console.error);
-});
+        .catch(console.error);
+}
 
-function updateCount(count) {
-    chrome.action.setBadgeText({
-        text: count !== undefined && count > 0 ? count.toString() : ''
+async function sendMessageToAllTabs(eventType, content = {}) {
+    const tags = await chrome.tabs.query({});
+
+    const promises = tags.map(async tab => {
+        try {
+            await chrome.tabs.sendMessage(tab.id, { type: eventType, data: content });
+        } catch (error) {
+            console.warn(error);
+        }
     });
 
-    chrome.tabs.query({active: true, currentWindow: true}, tabs => {
-        for (const tab of tabs) {
-            chrome.tabs.sendMessage(tab.id, { type: 'update-count', data: { count } });
-        }
+    await Promise.allSettled(promises);
+}
+
+function setBage(value) {
+    chrome.action.setBadgeText({
+        text: value !== undefined && value > 0 ? value.toString() : ''
     });
 }

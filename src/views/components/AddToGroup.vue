@@ -8,19 +8,20 @@ export default {
     props: {
         mediaUrl: String,
         hashTags: Array,
-        mediaGroup: Object
+        mediaGroup: Object,
+        sourceUrl: String,
     },
     setup(props) {
-        const isAddingToGroup = inject('isAddingToGroup');
+        const state = inject('state');
         const notifications = inject('notifications');
 
         async function updateGroupMedia() {
             try {
-                const mediaItem = new MediaItem(MEDIA_TYPES.PHOTO, props.mediaUrl, 'test caption', props.hashTags);
+                const mediaItem = new MediaItem(MEDIA_TYPES.PHOTO, props.mediaUrl, 'test caption', props.hashTags, props.sourceUrl);
                 const response = await chrome.runtime.sendMessage({ type: 'update-group', data: { mediaItem } });
 
                 if (response.level === ERROR_LEVELS.SUCCESS) {
-                    isAddingToGroup.value = !isAddingToGroup.value;
+                    state.isAddingToGroup = !state.isAddingToGroup;
                 } else {
                     notifications.value.push(response);
                 }
@@ -31,7 +32,7 @@ export default {
             }
         }
         return {
-            isAddingToGroup,
+            state,
             updateGroupMedia
         }
     }
@@ -40,7 +41,7 @@ export default {
 
 <template>
     <button @click="updateGroupMedia" class="aaf-button">
-        <div v-if="isAddingToGroup">remove</div>
+        <div v-if="state.isAddingToGroup">remove</div>
         <div v-else>add</div>
     </button>
 </template>

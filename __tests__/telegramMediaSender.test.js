@@ -6,9 +6,9 @@ const mockChromeStorageData = {
 }
 
 const mockMediaGroup = [
-    { type: 'photo', url: 'https://example.com/medianame.jpg', caption: '', hashtags: [] },
-    { type: 'photo', url: 'https://example.com/medianame.jpg', caption: '', hashtags: [{ title: '', tags: [] }] },
-    { type: 'photo', url: 'https://example.com/medianame.jpg', caption: '', hashtags: [] },
+    { type: 'photo', url: 'https://example.com/medianame.jpg', caption: '', sourceUrl: [], hashtags: [] },
+    { type: 'photo', url: 'https://example.com/medianame.jpg', caption: '', sourceUrl: [], hashtags: [{ title: '', tags: [] }] },
+    { type: 'photo', url: 'https://example.com/medianame.jpg', caption: '', sourceUrl: [], hashtags: [] },
 ];
 
 const mockRequestBody = {
@@ -55,7 +55,7 @@ describe('TelegramImageSender', () => {
         it('should include unique tags in the caption', () => {
             const mediaGroup = [
                 {
-                    type: 'photo', url: 'https://example.com/medianame.jpg', caption: '', hashtags: [
+                    type: 'photo', url: 'https://example.com/medianame.jpg', caption: '', sourceUrl: [], hashtags: [
                         { title: 'first title', tags: ['#test_tag1', '#test_tag2', '#test_tag1'] },
                         { title: 'last title', tags: ['#test_tag1', '#test_tag2', '#test_tag2'] },
                     ]

@@ -84,10 +84,10 @@ export function positionRelativeToTarget(parentElement, targetElement) {
  *
  * @returns {string} The converted markdown.
  */
-export function convertTagsToMarkdown(tagGroup) {
+export function convertTagsToHtml(tagGroup) {
     let text = '';
 
-    for (const {title, tags} of tagGroup) {
+    for (const { title, tags } of tagGroup) {
         text += title.length | tags.length ? `<i>${title}:</i> ${tags.join(' ')}\n` : '';
     }
 
@@ -118,4 +118,15 @@ export function exstractHashtags(mediaGroup) {
         title,
         tags: [...tags]
     }));
+}
+
+export function convertLinksToHtml(mediaGroup, prefix, separator) {
+    const newLinks = mediaGroup
+    .map((item, index) => {
+        const linkNumer = mediaGroup.length > 1 ? ' ' + (index + 1) : '';
+        return item.sourceUrl.length !== 0 ? `<a href="${item.sourceUrl}">${prefix}${linkNumer}</a>` : null;
+    })
+    .filter(item => item)
+
+    return newLinks.join(separator);
 }

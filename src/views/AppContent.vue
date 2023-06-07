@@ -1,6 +1,6 @@
 <script>
 import { ref, reactive, provide, onMounted } from 'vue';
-import { ERROR_LEVELS, SELECTORS } from '../constants';
+import { SELECTORS } from '../constants';
 import { getMediaUrlBySelector, getHashtags, positionRelativeToTarget } from '../utils/helpers';
 import { MediaGroup } from '../services/MediaGroup';
 
@@ -15,34 +15,61 @@ export default {
         const mediaGroup = new MediaGroup();
         const mediaUrl = getMediaUrlBySelector(SELECTORS.image);
         const hashTags = getHashtags(SELECTORS.tags);
+        const sourceUrl = window.location.href;
 
-        // Indication adding to group
-        const isAddingToGroup = ref(false);
-        // Vars for blocking UI in process sending
-        const isSending = ref(false);
-        // Number of media in the group
-        const mediaCount = ref(0);
         // Message for notification
         const notifications = ref([]);
 
-        provide('notifications', notifications)
-        provide('mediaCount', mediaCount);
-        provide('isAddingToGroup', isAddingToGroup);
-        provide('isSending', isSending);
+        const defaultState = {
+            // Number of media in the group
+            mediaCount: 0,
+
+            // Vars for blocking UI in process sending
+            isSending: false,
+
+            // Indication adding to group
+            isAddingToGroup: false
+        }
+
+        const state = reactive(Object.assign({}, defaultState));
+
+        provide('state', state);
+        provide('notifications', notifications);
+
+
+        async function init() {
+            await isMediaExists();
+            await updateCount();
+
+            chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+                switch (message.type) {
+                    case 'update-content':
+                        updateContent(message);
+                        break;
+
+                    case 'reset-state':
+                        resetToDefault();
+                        break;
+
+                    default:
+                        console.warn(`Unknown message type: ${message.type}`);
+                        break;
+                }
+            });
+        }
+
+        async function updateCount() {
+            state.mediaCount = (await mediaGroup.getMediaGroup()).length;
+        }
 
         async function isMediaExists() {
             const isExists = (await mediaGroup.getMediaGroup()).find(item => item.url === mediaUrl);
-            isAddingToGroup.value = !!isExists;
+            state.isAddingToGroup = !!isExists;
         }
 
-        function initEvents() {
-            chrome.runtime.onMessage.addListener((message, sender, sendRequest) => {
-                if (message.type === 'update-count') {
-                    mediaCount.value = message.data.count;
-                }
-
-                if (message.type === 'reset-to-default') resetToDefault();
-            });
+        function updateContent({ data }) {
+            Object.assign(state, data)
+            console.log(state);
         }
 
         function clearStorage() {
@@ -50,18 +77,11 @@ export default {
         }
 
         function resetToDefault() {
-            isAddingToGroup.value = false;
-            mediaCount.value = 0;
-        }
-
-        async function updateCount() {
-            mediaCount.value = (await mediaGroup.getMediaGroup()).length;
+            Object.assign(state, defaultState);
         }
 
         onMounted(async () => {
-            await isMediaExists();
-            await updateCount();
-            initEvents();
+            init();
 
             const mediaElement = document.querySelector(SELECTORS.image);
             const uiWrapperElement = document.querySelector('.aaf-ui-wrapper');
@@ -75,15 +95,17 @@ export default {
         });
 
         return {
+            state,
             mediaGroup,
-            mediaCount,
-            isSending,
+            sourceUrl,
             mediaUrl,
             hashTags,
-            notifications: notifications,
+            notifications,
+
             clearStorage
         };
     },
+
     components: { SendToTelegram, AddToGroup, MediaCount, NotificationMessage }
 }
 </script>
@@ -99,15 +121,17 @@ export default {
         -------------------------------------------------
     -->
     <div class="aaf-ui-wrapper">
-        <MediaCount>{{ mediaCount }}</MediaCount>
+        <send-to-telegram :media-group="mediaGroup" :media-url="mediaUrl" :hash-tags="hashTags" :sourceUrl="sourceUrl" />
         <br>
-        <button @click="clearStorage">clear storage</button>
-        <br>
-        <SendToTelegram :media-group="mediaGroup" :media-url="mediaUrl" :hash-tags="hashTags"></SendToTelegram>
-        <br>
-        <AddToGroup :media-group="mediaGroup" :media-url="mediaUrl" :hash-tags="hashTags"></AddToGroup>
+        <add-to-group :media-group="mediaGroup" :media-url="mediaUrl" :hash-tags="hashTags" :sourceUrl="sourceUrl" />
+
+        <div v-if="state.mediaCount > 0">
+            <br><br>
+            <button @click="clearStorage">clear storage ({{ state.mediaCount }})</button>
+        </div>
     </div>
-    <notification-message :notifications="notifications"></notification-message>
+
+    <notification-message :notifications="notifications" />
 </template>
 
 <style lang="scss">
