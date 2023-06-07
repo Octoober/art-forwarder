@@ -25,7 +25,15 @@ const mediaGroup = new MediaGroup();
 //     contexts: ["image"],
 // });
 
-chrome.runtime.onInstalled.addListener(setMediaGroupCount);
+
+chrome.runtime.onInstalled.addListener(details => {
+    setMediaGroupCount();
+    let externalUrl = "http://yoursite.com/";
+
+    if(details.reason === 'install') {
+        chrome.tabs.create({url: 'options.html?install=true'})
+    }
+});
 chrome.runtime.onStartup.addListener(setMediaGroupCount);
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
