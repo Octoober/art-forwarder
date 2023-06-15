@@ -1,3 +1,4 @@
+import { MEDIA_TYPES } from "../constants";
 
 /**
 * Converts a given string to a hashtag.
@@ -23,7 +24,7 @@ export function getHashtags(selectorGroup) {
     let hashtagGroup = []
 
     for (const { selectors, title } of selectorGroup) {
-        const elements = document.querySelectorAll(selectors.join(','));
+        const elements = document.querySelectorAll(selectors);
 
         if (!elements.length) continue;
 
@@ -51,8 +52,29 @@ export function getHashtags(selectorGroup) {
  * @returns {string|null} - The srcof the media element or null if not found.
  */
 export function getMediaUrlBySelector(selectors) {
-    const element = document.querySelector(selectors.join(','));
-    return element ? element.src : null;
+    const mediaElement = document.querySelector(selectors.join(','));
+    const src = mediaElement?.src || (mediaElement?.src === '' ? mediaElement?.querySelector('[src]').src : null);
+    const tagElement = mediaElement.tagName;
+
+    const mediaTypeMap = {
+        IMG: { type: MEDIA_TYPES.PHOTO, src },
+        VIDEO: { type: MEDIA_TYPES.VIDEO, src }
+    };
+
+    return mediaTypeMap[tagElement] ?? null;
+}
+
+export async function getMediaSizeByUrl(mediaUrl) {
+    try {
+        const response = await fetch(mediaUrl);
+        if (!response.ok) {
+            throw new Error('Load error');
+        }
+        const size = response.headers.get('content-length');
+        return size;
+    } catch (error) {
+        throw new Error(`Failed to fetch media data: ${error.message}`);
+    }
 }
 
 /**
@@ -122,11 +144,25 @@ export function exstractHashtags(mediaGroup) {
 
 export function convertLinksToHtml(mediaGroup, prefix, separator) {
     const newLinks = mediaGroup
-    .map((item, index) => {
-        const linkNumer = mediaGroup.length > 1 ? ' ' + (index + 1) : '';
-        return item.sourceUrl.length !== 0 ? `<a href="${item.sourceUrl}">${prefix}${linkNumer}</a>` : null;
-    })
-    .filter(item => item)
+        .map((item, index) => {
+            const linkNumer = mediaGroup.length > 1 ? ' ' + (index + 1) : '';
+            return item.sourceUrl.length !== 0 ? `<a href="${item.sourceUrl}">${prefix}${linkNumer}</a>` : null;
+        })
+        .filter(item => item)
 
     return newLinks.join(separator);
+}
+
+export function getExtensionByUrl(url) {
+    const extensionRegex = /\.(\w+)(?:$|\?)/;
+    const matches = url.match(extensionRegex);
+
+    return matches ? matches[1] : '';
+}
+
+export function repairPixivSourceUrl(url) {
+    const regex = /\/(\d+)(?:_p\d+)?.png$/;
+    const match = url.match(regex);
+    const sourceId = match[1];
+    return `https://www.pixiv.net/en/artworks/${sourceId}`;
 }

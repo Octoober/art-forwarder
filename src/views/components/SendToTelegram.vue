@@ -2,13 +2,12 @@
 import { inject } from 'vue';
 import { MEDIA_TYPES, TAGS } from '../../constants';
 import { MediaItem } from '../../models/MediaItem';
+import { getMediaSizeByUrl } from "../../utils/helpers";
 
 export default {
     props: {
-        mediaUrl: String,
-        hashTags: Array,
         mediaGroup: Object,
-        sourceUrl: String,
+        mediaItem: Object,
     },
     setup(props) {
         const state = inject('state');
@@ -19,9 +18,7 @@ export default {
                 state.isSending = true;
                 let group = await props.mediaGroup.getMediaGroup();
 
-                const mediaItem = new MediaItem(MEDIA_TYPES.PHOTO, props.mediaUrl, 'test caption', props.hashTags, props.sourceUrl);
-
-                group = group.length !== 0 ? group : [mediaItem];
+                group = group.length !== 0 ? group : [props.mediaItem];
 
                 chrome.runtime.sendMessage({ type: 'send-media', data: group }, response => {
                     notifications.value.push(response);

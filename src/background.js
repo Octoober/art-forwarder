@@ -4,6 +4,7 @@ import { TelegramMediaSender } from './services/TelegramMediaSender';
 import { MediaGroup } from "./services/MediaGroup";
 import { ERROR_LEVELS } from './constants';
 import { Notification } from './models/Notification';
+import { getMediaSizeByUrl } from './utils/helpers';
 
 const telegramSender = new TelegramMediaSender();
 const mediaGroup = new MediaGroup();
@@ -25,11 +26,8 @@ const mediaGroup = new MediaGroup();
 //     contexts: ["image"],
 // });
 
-
 chrome.runtime.onInstalled.addListener(details => {
     setMediaGroupCount();
-    let externalUrl = "http://yoursite.com/";
-
     if(details.reason === 'install') {
         chrome.tabs.create({url: 'options.html?install=true'})
     }
@@ -37,6 +35,16 @@ chrome.runtime.onInstalled.addListener(details => {
 chrome.runtime.onStartup.addListener(setMediaGroupCount);
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message?.type === 'extension-reload') {
+        const url = new URL(message.url).hostname;
+        chrome.tabs.query({url: `https://${url}/*`}, async tabs => {
+            for (const tab of tabs) {
+                chrome.tabs.reload(tab.id);
+            };
+            await chrome.runtime.reload();
+        });
+    }
+
     if (message?.type === 'send-media') {
         try {
             // POST request to telegram

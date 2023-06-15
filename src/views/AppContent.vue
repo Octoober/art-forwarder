@@ -1,7 +1,36 @@
+<template>
+    <!--
+        -----------------------------------------------
+
+                 I will definitely become beautiful...
+                /
+            ಥ_ಥ
+
+        -------------------------------------------------
+    -->
+    <div class="aaf-ui-wrapper">
+        <send-to-telegram :media-group="mediaGroup" :mediaItem="mediaItem" />
+        <br>
+        <add-to-group :media-group="mediaGroup" :mediaItem="mediaItem" />
+
+        <div v-if="state.mediaCount > 0">
+            <br><br>
+            <button @click="clearStorage">clear storage ({{ state.mediaCount }})</button>
+        </div>
+    </div>
+
+    <notification-message :notifications="notifications" />
+    <div class="reload-extansion-button" v-if="isDevMode" @dblclick="extensionReload"><span>reload extension</span></div>
+</template>
+
 <script>
 import { ref, reactive, provide, onMounted } from 'vue';
-import { SELECTORS } from '../constants';
-import { getMediaUrlBySelector, getHashtags, positionRelativeToTarget } from '../utils/helpers';
+
+import { MediaInfoContext } from '../services/MediaInfoStrategy/MediaInfoContext';
+import { DonmaiUsMediaInfo } from '../services/MediaInfoStrategy/DonmaiUs/DonmaiUsMediaInfo';
+import { Rule34XxxMediaInfo } from '../services/MediaInfoStrategy/Rule34Xxx/Rule34XxxMediaInfo';
+
+import { positionRelativeToTarget } from '../utils/helpers';
 import { MediaGroup } from '../services/MediaGroup';
 
 import SendToTelegram from './components/SendToTelegram.vue';
@@ -9,12 +38,13 @@ import AddToGroup from './components/AddToGroup.vue';
 import MediaCount from './components/MediaCount.vue';
 import NotificationMessage from './components/NotificationMessage.vue';
 
-
 export default {
     setup() {
         const mediaGroup = new MediaGroup();
-        const mediaUrl = getMediaUrlBySelector(SELECTORS.image);
-        const hashTags = getHashtags(SELECTORS.tags);
+        const mediaInfoConext = new MediaInfoContext();
+
+        const mediaItem = ref({});
+        // const hashTags = getHashtags(SELECTORS.tags);
         const sourceUrl = window.location.href;
 
         // Message for notification
@@ -29,15 +59,29 @@ export default {
 
             // Indication adding to group
             isAddingToGroup: false
-        }
-
+        };
         const state = reactive(Object.assign({}, defaultState));
 
         provide('state', state);
         provide('notifications', notifications);
 
+        async function extensionReload() {
+            await chrome.runtime.sendMessage({ type: 'extension-reload', url: location.href });
+        }
 
         async function init() {
+            const pageUrl = location.href;
+
+            mediaInfoConext.setStrategy('danbooru.donmai.us', new DonmaiUsMediaInfo());
+            mediaInfoConext.setStrategy('rule34.xxx', new Rule34XxxMediaInfo());
+
+            try {
+                mediaItem.value = mediaInfoConext.executeStrategy(pageUrl);
+                console.log('MediaItem:', mediaItem.value);
+            } catch (error) {
+                console.log(error);
+            }
+
             await isMediaExists();
             await updateCount();
 
@@ -63,13 +107,12 @@ export default {
         }
 
         async function isMediaExists() {
-            const isExists = (await mediaGroup.getMediaGroup()).find(item => item.url === mediaUrl);
+            const isExists = (await mediaGroup.getMediaGroup()).find(item => item.url === mediaItem.value.url);
             state.isAddingToGroup = !!isExists;
         }
 
         function updateContent({ data }) {
             Object.assign(state, data)
-            console.log(state);
         }
 
         function clearStorage() {
@@ -83,7 +126,7 @@ export default {
         onMounted(async () => {
             init();
 
-            const mediaElement = document.querySelector(SELECTORS.image);
+            const mediaElement = mediaItem.value.element;
             const uiWrapperElement = document.querySelector('.aaf-ui-wrapper');
 
             positionRelativeToTarget(uiWrapperElement, mediaElement);
@@ -95,11 +138,13 @@ export default {
         });
 
         return {
+            isDevMode: __IS_DEV_MODE__,
+            extensionReload,
+
             state,
             mediaGroup,
             sourceUrl,
-            mediaUrl,
-            hashTags,
+            mediaItem,
             notifications,
 
             clearStorage
@@ -110,31 +155,35 @@ export default {
 }
 </script>
 
-<template>
-    <!--
-        -----------------------------------------------
-
-                 I will definitely become beautiful...
-                /
-            ಥ_ಥ
-
-        -------------------------------------------------
-    -->
-    <div class="aaf-ui-wrapper">
-        <send-to-telegram :media-group="mediaGroup" :media-url="mediaUrl" :hash-tags="hashTags" :sourceUrl="sourceUrl" />
-        <br>
-        <add-to-group :media-group="mediaGroup" :media-url="mediaUrl" :hash-tags="hashTags" :sourceUrl="sourceUrl" />
-
-        <div v-if="state.mediaCount > 0">
-            <br><br>
-            <button @click="clearStorage">clear storage ({{ state.mediaCount }})</button>
-        </div>
-    </div>
-
-    <notification-message :notifications="notifications" />
-</template>
-
 <style lang="scss">
+.reload-extansion-button {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    background-color: #4942E4;
+    color: #fff;
+    width: 25px;
+    z-index: 1000000;
+    text-align: center;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition-delay: .7s;
+    span {
+        font-size: 14px;
+        white-space: nowrap;
+        transform: rotate(90deg);
+        user-select: none;
+    }
+    &:hover {
+        opacity: 1;
+        transition-delay: 0s;
+    }
+}
+
 .aaf-ui-wrapper {
     position: absolute;
     width: 120px;

@@ -1,6 +1,5 @@
 'use strict';
 
-const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { VueLoaderPlugin } = require('vue-loader');
@@ -73,10 +72,6 @@ const common = {
     },
     plugins: [
         new VueLoaderPlugin(),
-        new webpack.DefinePlugin({
-            __VUE_OPTIONS_API__: true,
-            __VUE_PROD_DEVTOOLS__: true
-        }),
         // Copy static assets from `public` folder to `build` folder
         new CopyWebpackPlugin({
             patterns: [
@@ -92,5 +87,4 @@ const common = {
         }),
     ],
 };
-
 module.exports = common;
